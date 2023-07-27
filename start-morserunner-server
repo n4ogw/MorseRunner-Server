@@ -1,0 +1,17 @@
+#!/bin/bash
+killall socat
+socat -d -d pty,rawer,echo=0,link=/tmp/pty1 pty,rawer,echo=0,link=/tmp/pty2 &
+sleep 1
+if [ -e '/tmp/pty1' ];
+then
+   echo 'Created /tmp/pty1'
+fi
+if [ -e '/tmp/pty2' ];
+then
+   echo 'Created /tmp/pty2'
+fi
+MorseRunner-Server
+killall socat
+
+
+

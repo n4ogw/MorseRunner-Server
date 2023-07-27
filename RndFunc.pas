@@ -12,19 +12,19 @@ interface
 uses
   SysUtils, Math, SndTypes, Ini;
 
-function RndNormal: Single;
-function RndGaussLim(AMean, ALim: Single): Single;
-function RndRayleigh(AMean: Single): Single;
-function BlocksToSeconds(Blocks: Single): Single;
-function SecondsToBlocks(Sec: Single): integer;
-function RndUniform: Single;
-function RndUShaped: Single;
-function RndPoisson(AMean: Single): integer;
+function RndNormal: single;
+function RndGaussLim(AMean, ALim: single): single;
+function RndRayleigh(AMean: single): single;
+function BlocksToSeconds(Blocks: single): single;
+function SecondsToBlocks(Sec: single): integer;
+function RndUniform: single;
+function RndUShaped: single;
+function RndPoisson(AMean: single): integer;
 
 
 implementation
 
-function RndNormal: Single;
+function RndNormal: single;
 begin
   repeat
     try
@@ -37,53 +37,53 @@ begin
 end;
 
 
-function RndGaussLim(AMean, ALim: Single): Single;
+function RndGaussLim(AMean, ALim: single): single;
 begin
   Result := AMean + RndNormal * 0.5 * ALim;
-  Result := Max(AMean-ALim, Min(AMean+ALim, Result));
+  Result := Max(AMean - ALim, Min(AMean + ALim, Result));
 end;
 
 
-function RndRayleigh(AMean: Single): Single;
+function RndRayleigh(AMean: single): single;
 begin
   Result := AMean * Sqrt(-Ln(Random) - Ln(Random));
 end;
 
 
-function SecondsToBlocks(Sec: Single): integer;
+function SecondsToBlocks(Sec: single): integer;
 begin
   Result := Round(DEFAULTRATE / Ini.BufSize * Sec);
 end;
 
-function BlocksToSeconds(Blocks: Single): Single;
+function BlocksToSeconds(Blocks: single): single;
 begin
   Result := Blocks * Ini.BufSize / DEFAULTRATE;
 end;
 
-function RndUniform: Single;
+function RndUniform: single;
 begin
-  Result := 2*Random - 1;
+  Result := 2 * Random - 1;
 end;
 
 
-function RndUShaped: Single;
+function RndUShaped: single;
 begin
-  Result := Sin(Pi*(Random-0.5));
+  Result := Sin(Pi * (Random - 0.5));
 end;
 
 
 //http://www.library.cornell.edu/nr/bookcpdf/c7-3.pdf
-function RndPoisson(AMean: Single): integer;
+function RndPoisson(AMean: single): integer;
 var
-  g, t: Single;
+  g, t: single;
 begin
   g := Exp(-AMean);
   t := 1;
-  for Result:=0 to 30 do
-    begin
+  for Result := 0 to 30 do
+  begin
     t := t * Random;
     if t <= g then Break;
-    end;
+  end;
 end;
 
 {
@@ -141,4 +141,3 @@ end;
 
 
 end.
-

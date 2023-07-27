@@ -10,15 +10,17 @@ unit DxStn;
 interface
 
 uses
-  SysUtils, Classes, Station, RndFunc, Ini, CallLst, Qsb, DxOper, Log, SndTypes;
+  SysUtils, Classes, Station, RndFunc, Ini, CallLst, Qsb, DxOper, Log, SndTypes,
+   Cabrillo;
 
 type
   TDxStation = class(TStation)
   private
     Qsb: TQsb;
   public
+    radioNr: integer;
     Oper: TDxOperator;
-    constructor CreateStation;
+    constructor CreateStation(num: integer);
     destructor Destroy; override;
     procedure ProcessEvent(AEvent: TStationEvent); override;
     procedure DataToLastQso;
@@ -33,14 +35,22 @@ uses
 
 { TDxStation }
 
-constructor TDxStation.CreateStation;
+constructor TDxStation.CreateStation(num : integer) ;
 begin
   inherited Create(nil);
 
-  HisCall := Ini.Call;
-  MyCall := PickCall;
-
+  HisCall := '';//Ini.Call;
+   if Ini.OpMode = opWpx then
+      MyCall := PickCall
+   else
+      begin
+	 MyCall := Cab.PickCall;
+	 CabExch := Cab.currentExch;
+      end;
+	 
+  radioNr := num;
   Oper := TDxOperator.Create;
+  Oper.setNr(num);
   Oper.Call := MyCall;
   Oper.Skills := 1 + Random(3); //1..3
   Oper.SetState(osNeedPrevEnd);
@@ -48,9 +58,9 @@ begin
 
   Wpm := Oper.GetWpm;
   NR := Oper.GetNR;
-  if Ini.Lids and (Random < 0.03)
-    then RST := 559 + 10*Random(4)
-    else RST := 599;
+  if Ini.Lids and (Random < 0.03) then RST := 559 + 10 * Random(4)
+  else
+    RST := 599;
 
   Qsb := TQsb.Create;
 
@@ -85,55 +95,64 @@ begin
   case AEvent of
     evMsgSent:
       //we finished sending and started listening
-      if Tst.Me.State = stSending
-        then TimeOut := NEVER
-        else TimeOut := Oper.GetReplyTimeout;
+      if Tst[radioNr].Me.State = stSending then TimeOut := NEVER
+      else
+        TimeOut := Oper.GetReplyTimeout;
 
     evTimeout:
-      begin
+    begin
       //he did not reply, quit or try again
       if State = stListening then
-        begin
+      begin
         Oper.MsgReceived([msgNone]);
-        if Oper.State = osFailed then begin Free; Exit; end;
-        State := stPreparingToSend;
+        if Oper.State = osFailed then
+        begin
+          Free;
+          Exit;
         end;
+        State := stPreparingToSend;
+      end;
       //preparations to send are done, now send
       if State = stPreparingToSend then
-        for i:=1 to Oper.RepeatCnt do SendMsg(Oper.GetReply)
-      end;
+        for i := 1 to Oper.RepeatCnt do SendMsg(Oper.GetReply);
+    end;
 
     evMeFinished: //he finished sending
       //we notice the message only if we are not sending ourselves
       if State <> stSending then
-        begin
+      begin
         //interpret the message
         case State of
           stCopying:
-            Oper.MsgReceived(Tst.Me.Msg);
+            Oper.MsgReceived(Tst[radioNr].Me.Msg);
 
           stListening, stPreparingToSend:
-           //these messages can be copied even if partially received
-            if (msgCQ in Tst.Me.Msg) or (msgTU in Tst.Me.Msg) or (msgNil in Tst.Me.Msg)
-              then Oper.MsgReceived(Tst.Me.Msg)
-              else Oper.MsgReceived([msgGarbage]);
-          end;
-
-          //react to the message
-          if Oper.State = osFailed
-            then begin Free; Exit; end         //give up
-            else TimeOut := Oper.GetSendDelay; //reply or switch to standby
-          State := stPreparingToSend;
+            //these messages can be copied even if partially received
+            if (msgCQ in Tst[radioNr].Me.Msg) or (msgTU in Tst[radioNr].Me.Msg) or
+              (msgNil in Tst[radioNr].Me.Msg) then Oper.MsgReceived(Tst[radioNr].Me.Msg)
+            else
+              Oper.MsgReceived([msgGarbage]);
         end;
+
+        //react to the message
+        if Oper.State = osFailed then
+        begin
+          Free;
+          Exit;
+        end         //give up
+        else
+          TimeOut := Oper.GetSendDelay; //reply or switch to standby
+        State := stPreparingToSend;
+      end;
 
     evMeStarted:
       //If we are not sending, we can start copying
       //Cancel timeout, he is replying
-      begin
+    begin
       if State <> stSending then State := stCopying;
       TimeOut := NEVER;
-      end;
     end;
+  end;
 end;
 
 
@@ -141,11 +160,11 @@ end;
 procedure TDxStation.DataToLastQso;
 begin
   with QsoList[High(QsoList)] do
-    begin
+  begin
     TrueCall := Self.MyCall;
     TrueRst := Self.Rst;
     TrueNR := Self.NR;
-    end;
+  end;
 
   Free;
 end;
@@ -160,4 +179,3 @@ begin
 end;
 
 end.
-

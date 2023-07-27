@@ -10,33 +10,34 @@ unit QuickAvg;
 interface
 
 uses
-  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics,
+  Controls, Forms, Dialogs,
   Math, SndTypes;
 
 type
-  TDoubleArray2D = array of array of Double;
+  TDoubleArray2D = array of array of double;
 
   TQuickAverage = class(TComponent)
   private
     FPasses: integer;
     FPoints: integer;
-    FScale: Single;
+    FScale: single;
 
     ReBufs, ImBufs: TDoubleArray2D;
     Idx, PrevIdx: integer;
 
     procedure SetPasses(const Value: integer);
     procedure SetPoints(const Value: integer);
-    function DoFilter(V: Single; Bufs: TDoubleArray2D): Single;
+    function DoFilter(V: single; Bufs: TDoubleArray2D): single;
   protected
     { Protected declarations }
   public
     constructor Create(AOwner: TComponent); override;
     procedure Reset;
-    function Filter(V: Single): Single; overload;
-    function Filter(ARe, AIm: Single): TComplex; overload;
+    function Filter(V: single): single; overload;
+    function Filter(ARe, AIm: single): TComplex; overload;
     function Filter(V: TComplex): TComplex; overload;
-    function FilteredModule(ARe, AIm: Single): Single;
+    function FilteredModule(ARe, AIm: single): single;
   published
     property Passes: integer read FPasses write SetPasses;
     property Points: integer read FPoints write SetPoints;
@@ -82,18 +83,15 @@ end;
 procedure TQuickAverage.Reset;
 begin
   ReBufs := nil;
-  SetLength(ReBufs, FPasses+1, FPoints);
+  SetLength(ReBufs, FPasses + 1, FPoints);
 
   ImBufs := nil;
-  SetLength(ImBufs, FPasses+1, FPoints);
+  SetLength(ImBufs, FPasses + 1, FPoints);
 
   FScale := IntPower(FPoints, -FPasses);
   Idx := 0;
-  PrevIdx := FPoints-1;
+  PrevIdx := FPoints - 1;
 end;
-
-
-
 
 
 
@@ -101,7 +99,7 @@ end;
 //------------------------------------------------------------------------------
 //                                 filter
 //------------------------------------------------------------------------------
-function TQuickAverage.Filter(V: Single): Single;
+function TQuickAverage.Filter(V: single): single;
 begin
   Result := DoFilter(V, ReBufs);
   PrevIdx := Idx;
@@ -110,7 +108,7 @@ begin
 end;
 
 
-function TQuickAverage.Filter(ARe, AIm: Single): TComplex;
+function TQuickAverage.Filter(ARe, AIm: single): TComplex;
 begin
   Result.Re := DoFilter(ARe, ReBufs);
   Result.Im := DoFilter(AIm, ImBufs);
@@ -130,24 +128,24 @@ begin
 end;
 
 
-function TQuickAverage.FilteredModule(ARe, AIm: Single): Single;
+function TQuickAverage.FilteredModule(ARe, AIm: single): single;
 begin
   with Filter(ARe, AIm) do
     Result := Sqrt(Sqr(Re) + Sqr(Im));
 end;
 
-function TQuickAverage.DoFilter(V: Single; Bufs: TDoubleArray2D): Single;
+function TQuickAverage.DoFilter(V: single; Bufs: TDoubleArray2D): single;
 var
   p: integer;
 begin
   Result := V;
-  for p:=1 to FPasses do
-    begin
+  for p := 1 to FPasses do
+  begin
     V := Result;
-    Result := Bufs[p][PrevIdx] - Bufs[p-1][Idx] + V;
-    Bufs[p-1][Idx] := V;
-    end;
-  Bufs[FPasses,Idx] := Result;
+    Result := Bufs[p][PrevIdx] - Bufs[p - 1][Idx] + V;
+    Bufs[p - 1][Idx] := V;
+  end;
+  Bufs[FPasses, Idx] := Result;
   Result := Result * FScale;
 end;
 
@@ -155,4 +153,3 @@ end;
 
 
 end.
-

@@ -15,14 +15,15 @@ uses
 type
   TStations = class(TCollection)
   private
-    function GetItem(Index: Integer): TStation;
+    function GetItem(Index: integer): TStation;
   public
-    constructor Create;
+    radioNr: integer;
+    constructor Create(nr : integer) ;
     //destructor Destroy; override;
     function AddCaller: TStation;
     function AddQrn: TStation;
     function AddQrm: TStation;
-    property Items[Index: Integer]: TStation read GetItem; default;
+    property Items[Index: integer]: TStation read GetItem; default;
   end;
 
 implementation
@@ -32,13 +33,14 @@ implementation
 
 { TStations }
 
-constructor TStations.Create;
+    constructor TStations.Create(nr : integer);
 begin
+   radioNr := nr;
   inherited Create(TStation);
 end;
 
 
-function TStations.GetItem(Index: Integer): TStation;
+function TStations.GetItem(Index: integer): TStation;
 begin
   Result := (inherited GetItem(Index)) as TStation;
 end;
@@ -46,7 +48,7 @@ end;
 
 function TStations.AddCaller: TStation;
 begin
-  Result := TDxStation.CreateStation;
+  Result := TDxStation.CreateStation(radioNr);
   Result.Collection := Self;
 end;
 
@@ -68,4 +70,3 @@ end;
 
 
 end.
-

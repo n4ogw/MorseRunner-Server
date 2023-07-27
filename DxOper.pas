@@ -10,7 +10,7 @@ unit DxOper;
 interface
 
 uses
-  SysUtils, RndFunc, Station, Ini, Math, Log;
+  SysUtils, RndFunc, Station, Ini, Math;
 
 const
   FULL_PATIENCE = 5;
@@ -27,6 +27,7 @@ type
     procedure DecPatience;
     function IsMyCall: TCallCheckResult;
   public
+    radioNr: integer;
     Call: string;
     Skills: integer;
     Patience: integer;
@@ -39,7 +40,8 @@ type
     procedure MsgReceived(AMsg: TStationMessages);
     procedure SetState(AState: TOperatorState);
     function GetReply: TStationMessage;
-  end;
+    procedure setNr(nr :  integer);
+  end;			  
 
 
 implementation
@@ -49,41 +51,40 @@ uses
 
 { TDxOperator }
 
+procedure TDxOperator.setNr(nr :  integer);
+begin
+   radioNr := nr;
+end;
+    
 
 //Delay before reply, keying speed and exchange number are functions
 //of the operator's skills
 
 function TDxOperator.GetSendDelay: integer;
 begin
-//  Result := Max(1, SecondsToBlocks(1 / Sqr(4*Skills)));
-//  Result := Round(RndGaussLim(Result, 0.7 * Result));
+  //  Result := Max(1, SecondsToBlocks(1 / Sqr(4*Skills)));
+  //  Result := Round(RndGaussLim(Result, 0.7 * Result));
 
-  if State = osNeedPrevEnd
-    then Result := NEVER
-  else if RunMode = rmHst
-    then Result := SecondsToBlocks(0.05 + 0.5*Random * 10/Wpm)
+  if State = osNeedPrevEnd then Result := NEVER
   else
-    Result := SecondsToBlocks(0.1 + 0.5*Random);
+    Result := SecondsToBlocks(0.1 + 0.5 * Random);
 end;
 
 function TDxOperator.GetWpm: integer;
 begin
-  if RunMode = rmHst
-    then Result := Ini.Wpm
-    else Result := Round(Ini.Wpm * 0.5 * (1 + Random));
+   Result := Round(Ini.Wpm * 0.5 * (1 + Random));
 end;
+
 
 function TDxOperator.GetNR: integer;
 begin
-  Result := 1 + Round(Random * Tst.Minute * Skills);
+  Result := 1 + Round(Random * Tst[radioNr].Minute * Skills);
 end;
 
 function TDxOperator.GetReplyTimeout: integer;
 begin
-  if RunMode = rmHst
-    then  Result := SecondsToBlocks(60/Wpm)
-    else Result := SecondsToBlocks(6-Skills);
-  Result := Round(RndGaussLim(Result, Result/2));
+  Result := SecondsToBlocks(6 - Skills);
+  Result := Round(RndGaussLim(Result, Result / 2));
 end;
 
 
@@ -100,19 +101,22 @@ end;
 procedure TDxOperator.SetState(AState: TOperatorState);
 begin
   State := AState;
-  if AState = osNeedQso
-    then Patience := Round(RndRayleigh(4))
-    else Patience := FULL_PATIENCE;
+  if AState = osNeedQso then Patience := Round(RndRayleigh(4))
+  else
+    Patience := FULL_PATIENCE;
 
-  if (AState = osNeedQso) and (not (RunMode in [rmSingle, RmHst])) and (Random < 0.1)
-    then RepeatCnt := 2
-    else RepeatCnt := 1;
+  if (AState = osNeedQso)  and
+    (Random < 0.1) then RepeatCnt := 2
+  else
+    RepeatCnt := 1;
 end;
 
 
 function TDxOperator.IsMyCall: TCallCheckResult;
 const
-  W_X = 2; W_Y = 2; W_D = 2;
+  W_X = 2;
+  W_Y = 2;
+  W_D = 2;
 var
   C, C0: string;
   M: array of array of integer;
@@ -120,39 +124,40 @@ var
   T, L, D: integer;
 begin
   C0 := Call;
-  C := Tst.Me.HisCall;
+  C := Tst[radioNr].Me.HisCall;
 
-  SetLength(M, Length(C)+1, Length(C0)+1);
+  SetLength(M, Length(C) + 1, Length(C0) + 1);
 
   //dynamic programming algorithm
 
-  for y:=0 to High(M[0]) do M[0,y] := 0;
-  for x:=1 to High(M) do M[x,0] := M[x-1,0] + W_X;
+  for y := 0 to High(M[0]) do M[0, y] := 0;
+  for x := 1 to High(M) do M[x, 0] := M[x - 1, 0] + W_X;
 
-  for x:=1 to High(M) do
-    for y:=1 to High(M[0]) do
-      begin
-      T := M[x,y-1];
+  for x := 1 to High(M) do
+    for y := 1 to High(M[0]) do
+    begin
+      T := M[x, y - 1];
       //'?' can match more than one char
       //end may be missing
       if (x < High(M)) and (C[x] <> '?') then Inc(T, W_Y);
 
-      L := M[x-1,y];
+      L := M[x - 1, y];
       //'?' can match no chars
       if C[x] <> '?' then Inc(L, W_X);
 
-      D := M[x-1,y-1];
+      D := M[x - 1, y - 1];
       //'?' matches any char
       if not (C[x] in [C0[y], '?']) then Inc(D, W_D);
 
-      M[x,y] := MinIntValue([T,D,L]);
-      end;
+      M[x, y] := MinIntValue([T, D, L]);
+    end;
 
   //classify by penalty
   case M[High(M), High(M[0])] of
-    0:   Result := mcYes;
-    1,2: Result := mcAlmost;             
-    else Result := mcNo;
+    0: Result := mcYes;
+    1, 2: Result := mcAlmost;
+    else
+      Result := mcNo;
   end;
 
 
@@ -162,8 +167,7 @@ begin
 
   //partial and wildcard match result in 0 penalty but are not exact matches
   if (Result = mcYes) then
-    if (Length(C) <> Length(C0)) or (Pos('?', C) > 0)
-      then Result := mcAlmost;
+    if (Length(C) <> Length(C0)) or (Pos('?', C) > 0) then Result := mcAlmost;
 
   //partial match too short
   if Length(StringReplace(C, '?', '', [rfReplaceAll])) < 2 then Result := mcNo;
@@ -173,7 +177,7 @@ begin
     case Result of
       mcYes: if Random < 0.01 then Result := mcAlmost;
       mcAlmost: if Random < 0.04 then Result := mcYes;
-      end;
+    end;
 end;
 
 
@@ -181,25 +185,25 @@ procedure TDxOperator.MsgReceived(AMsg: TStationMessages);
 begin
   //if CQ received, we can call no matter what else was sent
   if msgCQ in AMsg then
-    begin
+  begin
     case State of
       osNeedPrevEnd: SetState(osNeedQso);
       osNeedQso: DecPatience;
       osNeedNr, osNeedCall, osNeedCallNr: State := osFailed;
       osNeedEnd: State := osDone;
-      end;
-    Exit;
     end;
+    Exit;
+  end;
 
   if msgNil in AMsg then
-    begin
+  begin
     case State of
       osNeedPrevEnd: SetState(osNeedQso);
       osNeedQso: DecPatience;
       osNeedNr, osNeedCall, osNeedCallNr, osNeedEnd: State := osFailed;
-     end;
+    end;
     Exit;
-    end;  
+  end;
 
 
   if msgHisCall in AMsg then
@@ -218,7 +222,7 @@ begin
         if State = osNeedQso then State := osNeedPrevEnd
         else if State in [osNeedNr, osNeedCall, osNeedCallNr] then State := osFailed
         else if State = osNeedEnd then State := osDone;
-      end;
+    end;
 
 
   if msgB4 in AMsg then
@@ -226,18 +230,18 @@ begin
       osNeedPrevEnd, osNeedQso: SetState(osNeedQso);
       osNeedNr, osNeedEnd: State := osFailed;
       osNeedCall, osNeedCallNr: ; //same state: correct the call
-      end;
+    end;
 
 
   if msgNR in AMsg then
     case State of
       osNeedPrevEnd: ;
       osNeedQso: State := osNeedPrevEnd;
-      osNeedNr: if (Random < 0.9) or (RunMode = rmHst) then SetState(osNeedEnd);
+      osNeedNr: if (Random < 0.9) then SetState(osNeedEnd);
       osNeedCall: ;
-      osNeedCallNr: if (Random < 0.9) or (RunMode = rmHst) then SetState(osNeedCall);
+      osNeedCallNr: if (Random < 0.9) then SetState(osNeedCall);
       osNeedEnd: ;
-      end;
+    end;
 
   if msgTU in AMsg then
     case State of
@@ -247,7 +251,7 @@ begin
       osNeedCall: ;
       osNeedCallNr: ;
       osNeedEnd: State := osDone;
-      end;
+    end;
 
   if (not Ini.Lids) and (AMsg = [msgGarbage]) then State := osNeedPrevEnd;
 
@@ -262,27 +266,30 @@ begin
     osNeedPrevEnd, osDone, osFailed: Result := msgNone;
     osNeedQso: Result := msgMyCall;
     osNeedNr:
-      if (Patience = (FULL_PATIENCE-1)) or (Random < 0.3)
-        then Result := msgNrQm
-        else Result := msgAgn;
+      if (Patience = (FULL_PATIENCE - 1)) or (Random < 0.3) then Result := msgNrQm
+      else
+        Result := msgAgn;
 
 
     osNeedCall:
-      if (RunMode = rmHst) or (Random > 0.5) then Result := msgDeMyCallNr1
+       // N4OGW: make sending call twice much less likely
+      if (Random > 0.1) then Result := msgDeMyCallNr1
+//      if (RunMode = rmHst) or (Random > 0.5) then Result := msgDeMyCallNr1
       else if Random > 0.25 then Result := msgDeMyCallNr2
-      else Result := msgMyCallNr2;
+      else
+        Result := msgMyCallNr2;
 
     osNeedCallNr:
-      if (RunMode = rmHst) or (Random > 0.5)
-        then Result := msgDeMyCall1
-        else Result := msgDeMyCall2;
+      if (Random > 0.5) then Result := msgDeMyCall1
+      else
+        Result := msgDeMyCall2;
 
     else //osNeedEnd:
-      if Patience < (FULL_PATIENCE-1) then Result := msgNR
-      else if (RunMode = rmHst) or (Random < 0.9) then Result := msgR_NR
-      else Result := msgR_NR2;
-    end;
+      if Patience < (FULL_PATIENCE - 1) then Result := msgNR
+      else if (Random < 0.9) then Result := msgR_NR
+      else
+        Result := msgR_NR2;
+  end;
 end;
 
 end.
-

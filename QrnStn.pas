@@ -31,9 +31,9 @@ begin
 
   Dur := SecondsToBlocks(Random) * Ini.BufSize;
   SetLength(Envelope, Dur);
-  Amplitude := 1E5*Power(10, 2*Random);
-  for i:=0 to High(Envelope) do
-    if Random < 0.01 then Envelope[i] := (Random-0.5) * Amplitude;
+  Amplitude := 1E5 * Power(10, 2 * Random);
+  for i := 0 to High(Envelope) do
+    if Random < 0.01 then Envelope[i] := (Random - 0.5) * Amplitude;
 
   State := stSending;
 end;
@@ -45,4 +45,3 @@ begin
 end;
 
 end.
-

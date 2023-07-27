@@ -29,18 +29,19 @@ begin
   inherited Create(nil);
 
   Patience := 1 + Random(5);
+   // RTC need switch for cabrillo call
   MyCall := PickCall;
-  HisCall := Ini.Call;
+  HisCall := ''; //Ini.Call;
   Amplitude := 5000 + 25000 * Random;
   Pitch := Round(RndGaussLim(0, 300));
   Wpm := 30 + Random(20);
 
   case Random(7) of
     0: SendMsg(MsgQrl);
-    1,2: SendMsg(MsgQrl2);
-    3,4,5: SendMsg(msgLongCQ);
-    6: SendMsg(MsqQsy);
-    end;
+    1, 2: SendMsg(MsgQrl2);
+    3, 4, 5: SendMsg(msgLongCQ);
+    6: SendMsg(MsgQsy);
+  end;
 end;
 
 
@@ -48,16 +49,15 @@ procedure TQrmStation.ProcessEvent(AEvent: TStationEvent);
 begin
   case AEvent of
     evMsgSent:
-      begin
+    begin
       Dec(Patience);
-      if Patience = 0
-        then Free
-        else Timeout := Round(RndGaussLim(SecondsToBlocks(4), 2));
-      end;
+      if Patience = 0 then Free
+      else
+        Timeout := Round(RndGaussLim(SecondsToBlocks(4), 2));
+    end;
     evTimeout:
       SendMsg(msgLongCQ);
-    end;
+  end;
 end;
 
 end.
-

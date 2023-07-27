@@ -17,10 +17,10 @@ type
   in order to receive windows messages and makes sure that
   DoSetEnabled is called only at run time}
 
-  TBaseComponent = class (TComponent)
+  TBaseComponent = class(TComponent)
   private
     FHandle: THandle;
-    FEnabled : boolean;
+    FEnabled: boolean;
     procedure SetEnabled(AEnabled: boolean);
     procedure WndProc(var Message: TMessage);
     //procedure WMQueryEndSession(var Message: TMessage); message WM_QUERYENDSESSION;
@@ -29,7 +29,7 @@ type
     procedure Loaded; override;
     property Handle: THandle read FHandle;
   public
-    property Enabled: boolean read FEnabled write SetEnabled default false;
+    property Enabled: boolean read FEnabled write SetEnabled default False;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   end;
@@ -37,19 +37,19 @@ type
 
 implementation
 
- { TBaseComponent }
+{ TBaseComponent }
 
 constructor TBaseComponent.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FHandle := 0;
-  FEnabled := false;
+  FEnabled := False;
 end;
 
 
 destructor TBaseComponent.Destroy;
 begin
-  Enabled := false;
+  Enabled := False;
   inherited Destroy;
 end;
 
@@ -59,10 +59,10 @@ begin
   inherited Loaded;
 
   if FEnabled then
-    begin
-    FEnabled := false;
-    SetEnabled(true);
-    end;
+  begin
+    FEnabled := False;
+    SetEnabled(True);
+  end;
 end;
 
 
@@ -82,26 +82,24 @@ end;
 //  Message.Result := integer(true);
 //end;
 
-procedure TBaseComponent.SetEnabled (AEnabled: boolean);
+procedure TBaseComponent.SetEnabled(AEnabled: boolean);
 begin
   if (not (csDesigning in ComponentState)) and
-     (not (csLoading in ComponentState)) and
-     (AEnabled <> FEnabled)
-    then DoSetEnabled(AEnabled);
+    (not (csLoading in ComponentState)) and (AEnabled <> FEnabled) then
+    DoSetEnabled(AEnabled);
   FEnabled := AEnabled;
 end;
 
 
-procedure TBaseComponent.DoSetEnabled (AEnabled: boolean);
+procedure TBaseComponent.DoSetEnabled(AEnabled: boolean);
 begin
-  if AEnabled
-    then
-      FHandle := AllocateHwnd(WndProc)
-    else
-      begin
-      if FHandle <> 0 then DeallocateHwnd(FHandle);
-      FHandle := 0;
-      end;
+  if AEnabled then
+    FHandle := AllocateHwnd(WndProc)
+  else
+  begin
+    if FHandle <> 0 then DeallocateHwnd(FHandle);
+    FHandle := 0;
+  end;
 end;
 
 

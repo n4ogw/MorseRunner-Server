@@ -6,88 +6,46 @@
 unit Main;
 
 {$MODE Delphi}
+{$UNITPATH VCL/sdl2}
 
 interface
 
 uses
-  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  Buttons, SndCustm, SndOut, Contest, Ini, MorseKey, CallLst,
-  VolmSldr, VolumCtl, StdCtrls, Station, Menus, ExtCtrls, Log, MAth,
-  ComCtrls, Spin, SndTypes, ToolWin, ImgList, Crc32,
-  WavFile, IniFiles, sdl;
+  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics,
+  Controls, Forms, Dialogs, Buttons, SndCustm, SndOut, Contest, Ini, MorseKey, CallLst,
+  StdCtrls, Station, Menus, ExtCtrls, Log, Math, ComCtrls, Spin, ImgList, Crc32,
+  synaser, custApp, Cabrillo;
 
 const
-  WM_TBDOWN = WM_USER+1;
+  WM_TBDOWN = WM_USER + 1;
 
 type
+
+  { TMainForm }
+
   TMainForm = class(TForm)
     AlSoundOut1: TAlSoundOut;
+    ComboBox3: TComboBox;
+    Edit1: TEdit;
+    OpenDialog1: TOpenDialog;
+    Port: TLabel;
+    Label17: TLabel;
     MainMenu1: TMainMenu;
     File1: TMenuItem;
-    Send1: TMenuItem;
-    CQ1: TMenuItem;
-    Number1: TMenuItem;
-    TU1: TMenuItem;
-    MyCall1: TMenuItem;
-    HisCall1: TMenuItem;
-    QSOB41: TMenuItem;
+    MenuCabrillo: TMenuItem;
+    Port1: TLabel;
+    startButton: TToggleBox;
+    TrackBar: TTrackBar;
     N1: TMenuItem;
-    AGN1: TMenuItem;
     Bevel1: TBevel;
-    Panel1: TPanel;
-    Label1: TLabel;
-    SpeedButton4: TSpeedButton;
-    SpeedButton5: TSpeedButton;
-    SpeedButton6: TSpeedButton;
-    SpeedButton7: TSpeedButton;
-    SpeedButton8: TSpeedButton;
-    SpeedButton9: TSpeedButton;
-    SpeedButton10: TSpeedButton;
-    SpeedButton11: TSpeedButton;
-    Edit1: TEdit;
-    Label2: TLabel;
-    Edit2: TEdit;
-    Label3: TLabel;
-    Edit3: TEdit;
-    Bevel2: TBevel;
-    Panel2: TPanel;
-    Panel3: TPanel;
-    Panel4: TPanel;
     Help1: TMenuItem;
     Readme1: TMenuItem;
     About1: TMenuItem;
     N2: TMenuItem;
-    PaintBox1: TPaintBox;
-    Panel5: TPanel;
     Exit1: TMenuItem;
     Panel6: TPanel;
-    RichEdit1: TMemo;
-    Label12: TLabel;
-    Label13: TLabel;
-    Label14: TLabel;
-    Label15: TLabel;
-    Shape1: TShape;
-    PopupMenu1: TPopupMenu;
-    PileupMNU: TMenuItem;
-    SingleCallsMNU: TMenuItem;
-    CompetitionMNU: TMenuItem;
-    N3: TMenuItem;
-    StopMNU: TMenuItem;
-    ImageList1: TImageList;
-    Run1: TMenuItem;
-    PileUp1: TMenuItem;
-    SingleCalls1: TMenuItem;
-    Competition1: TMenuItem;
     N4: TMenuItem;
-    Stop1MNU: TMenuItem;
-    ViewScoreBoardMNU: TMenuItem;
-    ViewScoreTable1: TMenuItem;
     N5: TMenuItem;
-    Panel7: TPanel;
-    Label16: TLabel;
-    Panel8: TPanel;
-    Shape2: TShape;
-    AlWavFile1: TAlWavFile;
     Panel9: TPanel;
     GroupBox3: TGroupBox;
     Label11: TLabel;
@@ -98,27 +56,15 @@ type
     CheckBox6: TCheckBox;
     SpinEdit3: TSpinEdit;
     GroupBox1: TGroupBox;
-    Label4: TLabel;
     Label5: TLabel;
     Label6: TLabel;
     Label7: TLabel;
     Label9: TLabel;
-    Edit4: TEdit;
     SpinEdit1: TSpinEdit;
     CheckBox1: TCheckBox;
     ComboBox1: TComboBox;
     ComboBox2: TComboBox;
-    Panel10: TPanel;
-    Label8: TLabel;
-    SpinEdit2: TSpinEdit;
-    ToolBar1: TToolBar;
-    ToolButton1: TToolButton;
-    Label10: TLabel;
-    VolumeSlider1: TVolumeSlider;
-    Label18: TLabel;
-    WebPage1: TMenuItem;
     Settings1: TMenuItem;
-    Call1: TMenuItem;
     QSK1: TMenuItem;
     CWSpeed1: TMenuItem;
     N10WPM1: TMenuItem;
@@ -181,366 +127,289 @@ type
     N81: TMenuItem;
     N91: TMenuItem;
     N7: TMenuItem;
-    Duration1: TMenuItem;
-    N5min1: TMenuItem;
-    N10min1: TMenuItem;
-    N15min1: TMenuItem;
-    N30min1: TMenuItem;
-    N60min1: TMenuItem;
-    N90min1: TMenuItem;
-    N120min1: TMenuItem;
-    PlayRecordedAudio1: TMenuItem;
     N8: TMenuItem;
-    AudioRecordingEnabled1: TMenuItem;
-    HSTCompetition1: TMenuItem;
-    HSTCompetition2: TMenuItem;
     Panel11: TPanel;
-    LabelScoreRaw: TLabel;
-    LabelScoreVer: TLabel;
-    ListView1: TListView;
-    Operator1: TMenuItem;
+
+    procedure ComboBox3Change(Sender: TObject);
+    procedure Edit1Change(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure AlSoundOut1BufAvailable(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure Edit1KeyPress(Sender: TObject; var Key: Char);
-    procedure Edit2KeyPress(Sender: TObject; var Key: Char);
-    procedure Edit3KeyPress(Sender: TObject; var Key: Char);
-    procedure FormKeyPress(Sender: TObject; var Key: Char);
-    procedure FormKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
-    procedure Edit1Enter(Sender: TObject);
-    procedure SendClick(Sender: TObject);
-    procedure Edit4Change(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: char);
+    procedure FormKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
+    procedure CabrilloClick(Sender: TObject);
+    procedure GroupBox1ChangeBounds(Sender: TObject);
+    procedure GroupBox1Click(Sender: TObject);
+    procedure GroupBox1DragOver(Sender, Source: TObject; X, Y: integer;
+      State: TDragState; var Accept: boolean);
+    procedure GroupBox1EndDrag(Sender, Target: TObject; X, Y: integer);
+    procedure GroupBox1Enter(Sender: TObject);
+    procedure GroupBox1Exit(Sender: TObject);
+    procedure PortClick(Sender: TObject);
     procedure ComboBox2Change(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure SpinEdit1Change(Sender: TObject);
     procedure CheckBox1Click(Sender: TObject);
     procedure CheckBoxClick(Sender: TObject);
-    procedure SpinEdit2Change(Sender: TObject);
     procedure SpinEdit3Change(Sender: TObject);
-    procedure PaintBox1Paint(Sender: TObject);
     procedure Exit1Click(Sender: TObject);
     procedure About1Click(Sender: TObject);
     procedure Readme1Click(Sender: TObject);
-    procedure Edit1Change(Sender: TObject);
-    procedure RunMNUClick(Sender: TObject);
-    procedure RunBtnClick(Sender: TObject);
-    procedure ViewScoreBoardMNUClick(Sender: TObject);
-    procedure ViewScoreTable1Click(Sender: TObject);
-    procedure FormKeyUp(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
-    procedure Panel8MouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure Shape2MouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure Edit2Enter(Sender: TObject);
-    procedure VolumeSliderDblClick(Sender: TObject);
-    procedure VolumeSlider1Change(Sender: TObject);
-    procedure WebPage1Click(Sender: TObject);
-    procedure Call1Click(Sender: TObject);
+    procedure startButtonChange(Sender: TObject);
+    procedure TrackBarChange(Sender: TObject);
+    procedure TrackBarClick(Sender: TObject);
+    procedure FormKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure QSK1Click(Sender: TObject);
     procedure NWPMClick(Sender: TObject);
     procedure Pitch1Click(Sender: TObject);
     procedure Bw1Click(Sender: TObject);
     procedure File1Click(Sender: TObject);
-    procedure PlayRecordedAudio1Click(Sender: TObject);
-    procedure AudioRecordingEnabled1Click(Sender: TObject);
     procedure SelfMonClick(Sender: TObject);
     procedure Settings1Click(Sender: TObject);
     procedure LIDS1Click(Sender: TObject);
     procedure Activity1Click(Sender: TObject);
-    procedure Duration1Click(Sender: TObject);
-    procedure Operator1Click(Sender: TObject);
-    procedure StopMNUClick(Sender: TObject);
+    procedure setPort(serialPort :  string);
+    procedure setMode(mode :  TOpMode);
+    procedure setCabrillo(fileName : string);
   private
-    MustAdvance: boolean;
-    procedure ProcessSpace;
-    procedure SendMsg(Msg: TStationMessage);
-    procedure ProcessEnter;
     procedure EnableCtl(Ctl: TWinControl; AEnable: boolean);
-    procedure WmTbDown(var Msg: TMessage); message WM_TBDOWN;
-    procedure SetToolbuttonDown(Toolbutton: TToolbutton; ADown: boolean);
     procedure IncRit(dF: integer);
     procedure UpdateRitIndicator;
     procedure DecSpeed;
     procedure IncSpeed;
+    procedure so2rmini();
+    procedure so2rminiInit();
+
   public
     CompetitionMode: boolean;
     procedure Run(Value: TRunMode);
-    procedure WipeBoxes;
-    procedure PopupScoreWpx;
-    procedure PopupScoreHst;
-    procedure Advance;
 
     procedure SetQsk(Value: boolean);
-    procedure SetMyCall(ACall: string);
     procedure SetPitch(PitchNo: integer);
     procedure SetBw(BwNo: integer);
     procedure ReadCheckboxes;
+    procedure checkSerial(sender : TObject) ;
+    procedure so2rminiCW;
   end;
 
 var
-  MainForm: TMainForm;
+        MainForm	: TMainForm;
+	serialBuffer	: array [0..127] of byte;
+	serialOutBuffer	: array [0..127] of byte;
+        serialPtr	: integer;
+        serialOutPtr	: integer;
+	so2rMiniPtr	: integer;
+        so2rMiniOutPtr	: integer;
+	so2rMiniCmd	: byte;
+	so2rMiniStatus	: boolean;
+	cwBuffer	: array [1..2] of string;
+	serialInput	: TBlockSerial;
+	stopSent	: array [1..2] of boolean;
+	radioNrTx	: integer;
+        timer1		: TTimer;
 
 implementation
-
-uses ScoreDlg;
 
 {$R *.lfm}
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+  radioNrTx := 1;
+
   Randomize;
-  Tst := TContest.Create;
+  Tst[1] := TContest.Create(1);
+  Tst[2] := TContest.Create(2);
+  OpenDialog1.Title := 'Select Cabrillo file';
+  Cab := TCabrillo.Create;
+  Cab.SetNExch(2);
+
   LoadCallList;
 
   AlSoundOut1.BufCount := 4;
+  AlSoundOut1.SetChannel(0);
   FromIni;
 
   MakeKeyer;
   Keyer.Rate := DEFAULTRATE;
   Keyer.BufSize := Ini.BufSize;
 
-  Panel2.DoubleBuffered := true;
-  RichEdit1.Align := alClient;
+  if serialInput = Nil then 
+     serialInput := TBlockSerial.Create;
+  serialInput.LinuxLock := false;
+  Sleep(100);
+
+  so2rminiInit;
+
+  timer1 := TTimer.create( Self );
+  timer1.Interval := 10;
+  timer1.OnTimer := checkSerial;
+  timer1.enabled := true;
+
 end;
 
+procedure TMainForm.Edit1Change(Sender: TObject);
+begin
+  setPort(Trim(Edit1.Text));
+  if serialInput <> Nil then so2rminiInit;
+end;
+
+procedure TMainForm.ComboBox3Change(Sender: TObject);
+begin
+   if ComboBox3.ItemIndex = 0 then
+      setMode(opWPX)
+      else
+      setMode(opCab);
+end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
+  serialInput.Free;
   ToIni;
-  Tst.Free;
+  Tst[1].Free;
+  Tst[2].Free;
   DestroyKeyer;
 end;
-
 
 
 procedure TMainForm.AlSoundOut1BufAvailable(Sender: TObject);
 begin
   if AlSoundOut1.Enabled then
-     begin
-       //Writeln('AlSoundOut1BufAvailable');
-	try AlSoundOut1.PutData(Tst.GetAudio); except end;
-     end; 
-end;
-                                    
-
-procedure TMainForm.SendClick(Sender: TObject);
-var
-  Msg: TStationMessage;
-begin
-  Msg := TStationMessage((Sender as TComponent).Tag);
-
-  SendMsg(Msg);
-
-  case Msg of
-    msgHisCall: CallSent:= true;
-    msgNR: NrSent:= true;
+  begin
+    try
+     AlSoundOut1.PutData(Tst[1].GetAudio,Tst[2].GetAudio);
+    except
     end;
+  end;
 end;
 
-
-
-procedure TMainForm.SendMsg(Msg: TStationMessage);
+procedure TMainForm.setPort(serialPort : string);
 begin
-  if Msg = msgHisCall then
-    begin
-    if Edit1.Text <> '' then Tst.Me.HisCall := Edit1.Text;
-    CallSent := true;
-    end;
-
-  if Msg = msgNR then  NrSent := true;
-
-  Tst.Me.SendMsg(Msg);
+   Edit1.Text := serialPort;
+   Ini.serialPort := serialPort;
 end;
 
-
-procedure TMainForm.Edit1KeyPress(Sender: TObject; var Key: Char);
+procedure TMainForm.setMode(mode : TOpMode);
 begin
-  if not (Key in ['A'..'Z', 'a'..'z', '0'..'9', '/', '?', #8]) then Key := #0;
+   if mode = opWPX then
+      begin
+	 Ini.opMode := opWPX;
+	 ComboBox3.ItemIndex := 0;
+       end
+      else
+      begin
+	  Ini.opMode := opCab;
+	  ComboBox3.ItemIndex := 1;
+      end;
 end;
 
-procedure TMainForm.Edit2KeyPress(Sender: TObject; var Key: Char);
-begin
-  if not (Key in ['0'..'9', #8]) then Key := #0;
-end;
-
-procedure TMainForm.Edit3KeyPress(Sender: TObject; var Key: Char);
-begin
-  if not (Key in ['0'..'9', #8]) then Key := #0;
-end;
-
-
-procedure TMainForm.FormKeyPress(Sender: TObject; var Key: Char);
+procedure TMainForm.FormKeyPress(Sender: TObject; var Key: char);
 begin
   case Key of
-{
-    #13: //^M = ESM
-      Ini.Esm := not Ini.Esm;
-}
-    #23: //^W  = Wipe
-      WipeBoxes;
-
-    #25: //^Y  = Edit
-      ;
-
     #27: //Esc = Abort send
-      begin
-      if msgHisCall in Tst.Me.Msg then CallSent := false;
-      if msgNR in Tst.Me.Msg then NrSent := false;
-      Tst.Me.AbortSend;
-      end;
+    begin
+      if msgHisCall in Tst[1].Me.Msg then CallSent[1] := False;
+      if msgHisCall in Tst[2].Me.Msg then CallSent[2] := False;
+      if msgNR in Tst[1].Me.Msg then NrSent[1] := False;
+      if msgNR in Tst[2].Me.Msg then NrSent[2] := False;
+      Tst[1].Me.AbortSend;
+      Tst[2].Me.AbortSend;
+    end;
 
-    ';': //<his> <#>
-      begin
-      SendMsg(msgHisCall);
-      SendMsg(msgNr);
-      end;
-
-    '.', '+', '[', ',': //TU & Save
-      begin
-      if not CallSent then SendMsg(msgHisCall);
-      SendMsg(msgTU);
-      Log.SaveQso;
-      end;
-
-    ' ': //next field
-      ProcessSpace;
-
-    '\': // = F1
-      SendMsg(msgCQ);
-
-    else Exit;
+    else
+      Exit;
   end;
 
   Key := #0;
 end;
 
-
-procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
+procedure TMainForm.FormKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
 begin
   case Key of
-    VK_INSERT: //<his> <#>
-      begin
-      SendMsg(msgHisCall);
-      SendMsg(msgNr);
-      Key := 0;
-      end;
+    VK_UP:;
+      // RIT disabled
+      //if GetKeyState(VK_CONTROL) >= 0 then IncRit(1);
 
-    VK_RETURN: //Save
-      ProcessEnter;
-
-    VK_F11:
-      WipeBoxes;
-
-    87, 119: //Alt-W  = Wipe
-      if GetKeyState(VK_MENU) < 0 then WipeBoxes else Exit;
-
-{
-    'M': //Alt-M  = Auto CW
-      if GetKeyState(VK_MENU) < 0
-        then Ini.AutoCw := not Ini.AutoCw
-        else Exit;
-}
-
-    VK_UP:
-      if GetKeyState(VK_CONTROL) >= 0 then IncRit(1)
-      else if RunMode <> rmHst then SetBw(ComboBox2.ItemIndex+1);
-
-    VK_DOWN:
-      if GetKeyState(VK_CONTROL) >= 0  then IncRit(-1)
-      else if RunMode <> rmHst then SetBw(ComboBox2.ItemIndex-1);
+    VK_DOWN:;
+      // RIT disabled
+      //if GetKeyState(VK_CONTROL) >= 0 then IncRit(-1);
 
     VK_PRIOR: //PgUp
       IncSpeed;
 
     VK_NEXT: //PgDn
       DecSpeed;
-
-
-     VK_F9:
-       if (ssAlt in Shift) or  (ssCtrl in Shift) then DecSpeed;
-
-     VK_F10:
-       if (ssAlt in Shift) or  (ssCtrl in Shift) then IncSpeed;
-
-    else Exit;
-    end;
+    else
+      Exit;
+  end;
 
   Key := 0;
 end;
 
 
-procedure TMainForm.FormKeyUp(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
+procedure TMainForm.FormKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
 begin
   case Key of
     VK_INSERT, VK_RETURN: Key := 0;
-    end;
+  end;
 end;
 
-
-procedure TMainForm.ProcessSpace;
+procedure TMainForm.GroupBox1ChangeBounds(Sender: TObject);
 begin
-  MustAdvance := false;
 
-  if ActiveControl = Edit1 then
-    begin
-    if Edit2.Text = '' then Edit2.Text := '599';
-    ActiveControl := Edit3;
-    end
-  else if ActiveControl = Edit2 then
-    begin
-    if Edit2.Text = '' then Edit2.Text := '599';
-    ActiveControl := Edit3;
-    end
-  else
-    ActiveControl := Edit1;
 end;
 
-
-procedure TMainForm.ProcessEnter;
-var
-  C, N, R: boolean;
+procedure TMainForm.setCabrillo(fileName :  string);
 begin
-  MustAdvance := false;
+   Cab.LoadFile(fileName);
+end;
 
-  if (GetKeyState(VK_CONTROL) or GetKeyState(VK_SHIFT) or GetKeyState(VK_MENU)) < 0
-    then begin Log.SaveQso; Exit; end;
-
-  //no QSO in progress, send CQ
-  if Edit1.Text = '' then begin SendMsg(msgCq); Exit; end;
-
-  //current state
-  C := CallSent;
-  N := NrSent;
-  R := Edit3.Text <> '';
-
-  //send his call if did not send before, or if call changed
-  if (not C) or ((not N) and (not R)) then SendMsg(msgHisCall);
-  if not N then SendMsg(msgNR);
-  if N and not R then SendMsg(msgQm);
-
-  if R and (C or N)
-    then
-      begin
-      SendMsg(msgTU);
-      Log.SaveQso;
-      end
+procedure TMainForm.CabrilloClick(Sender: TObject);
+begin
+   if OpenDialog1.Execute then
+   begin
+    if fileExists(OpenDialog1.Filename) then
+       begin
+	  Ini.cabFile := OpenDialog1.Filename;
+       end;
+    end
     else
-      MustAdvance := true;
+       begin
+	  WriteLn('No file selected');
+	  Exit;
+       end;
+   setCabrillo(Ini.cabFile);
 end;
 
-
-procedure TMainForm.Edit1Enter(Sender: TObject);
-var
-  P: integer;
+procedure TMainForm.GroupBox1Click(Sender: TObject);
 begin
-  P := Pos('?', Edit1.Text);
-  if P > 1 then
-    begin Edit1.SelStart := P-1; Edit1.SelLength := 1; end;
+
+end;
+
+procedure TMainForm.GroupBox1DragOver(Sender, Source: TObject;
+  X, Y: integer; State: TDragState; var Accept: boolean);
+begin
+
+end;
+
+procedure TMainForm.GroupBox1EndDrag(Sender, Target: TObject; X, Y: integer);
+begin
+
+end;
+
+procedure TMainForm.GroupBox1Enter(Sender: TObject);
+begin
+
+end;
+
+procedure TMainForm.GroupBox1Exit(Sender: TObject);
+begin
+
+end;
+
+procedure TMainForm.PortClick(Sender: TObject);
+begin
+
 end;
 
 
@@ -549,7 +418,8 @@ begin
   Wpm := Trunc(Wpm / 5) * 5 + 5;
   Wpm := Max(10, Min(120, Wpm));
   SpinEdit1.Value := Wpm;
-  Tst.Me.Wpm := Wpm;
+  Tst[1].Me.Wpm := Wpm;
+  Tst[2].Me.Wpm := Wpm;
 end;
 
 
@@ -558,47 +428,39 @@ begin
   Wpm := Ceil(Wpm / 5) * 5 - 5;
   Wpm := Max(10, Min(120, Wpm));
   SpinEdit1.Value := Wpm;
-  Tst.Me.Wpm := Wpm;
+  Tst[1].Me.Wpm := Wpm;
+  Tst[2].Me.Wpm := Wpm;
 end;
 
-
-procedure TMainForm.Edit4Change(Sender: TObject);
-begin
-  SetMyCall(Trim(Edit4.Text));
-end;
-
-procedure TMainForm.SetMyCall(ACall: string);
-begin
-  Ini.Call := ACall;
-  Edit4.Text := ACall;
-  Tst.Me.MyCall := ACall;
-end;
 
 procedure TMainForm.SetPitch(PitchNo: integer);
 begin
   Ini.Pitch := 300 + PitchNo * 50;
   ComboBox1.ItemIndex := PitchNo;
-  Tst.Modul.CarrierFreq := Ini.Pitch;
+  Tst[1].Modul.CarrierFreq := Ini.Pitch;
+  Tst[2].Modul.CarrierFreq := Ini.Pitch;
 end;
 
 
 procedure TMainForm.SetBw(BwNo: integer);
+var
+   i :  integer;
 begin
   if (BwNo < 0) or (BwNo >= ComboBox2.Items.Count) then Exit;
 
   Ini.Bandwidth := 100 + BwNo * 50;
   ComboBox2.ItemIndex := BwNo;
 
-  Tst.Filt.Points := Round(0.7 * DEFAULTRATE / Ini.BandWidth);
-  Tst.Filt.GainDb := 10 * Log10(500/Ini.Bandwidth);
-  Tst.Filt2.Points := Tst.Filt.Points;
-  Tst.Filt2.GainDb := Tst.Filt.GainDb;
+   for i:= 1 to 2 do
+      begin
+	 Tst[i].Filt.Points := Round(0.7 * DEFAULTRATE / Ini.BandWidth);
+	 Tst[i].Filt.GainDb := 10 * Log10(500 / Ini.Bandwidth);
+	 Tst[i].Filt2.Points := Tst[i].Filt.Points;
+	 Tst[i].Filt2.GainDb := Tst[i].Filt.GainDb;
+      end;
 
-  UpdateRitIndicator;
+   UpdateRitIndicator;
 end;
-
-
-
 
 procedure TMainForm.ComboBox2Change(Sender: TObject);
 begin
@@ -612,26 +474,24 @@ end;
 
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  AlSoundOut1.Enabled := false;
-  if AlWavFile1.IsOpen then AlWavFile1.Close;
+  AlSoundOut1.Enabled := False;
 end;
 
 procedure TMainForm.SpinEdit1Change(Sender: TObject);
 begin
   Ini.Wpm := SpinEdit1.Value;
-  Tst.Me.Wpm := Ini.Wpm;
+  Tst[1].Me.Wpm := Ini.Wpm;
+  Tst[2].Me.Wpm := Ini.Wpm;
 end;
 
 procedure TMainForm.CheckBox1Click(Sender: TObject);
 begin
   SetQsk(CheckBox1.Checked);
-  ActiveControl := Edit1;
 end;
 
 procedure TMainForm.CheckBoxClick(Sender: TObject);
 begin
   ReadCheckboxes;
-  ActiveControl := Edit1;
 end;
 
 
@@ -644,20 +504,9 @@ begin
   Ini.Lids := CheckBox6.Checked;
 end;
 
-
-procedure TMainForm.SpinEdit2Change(Sender: TObject);
-begin
-  Ini.Duration := SpinEdit2.Value;
-end;
-
 procedure TMainForm.SpinEdit3Change(Sender: TObject);
 begin
   Ini.Activity := SpinEdit3.Value;
-end;
-
-procedure TMainForm.PaintBox1Paint(Sender: TObject);
-begin
-  Log.PaintHisto;
 end;
 
 procedure TMainForm.Exit1Click(Sender: TObject);
@@ -665,60 +514,24 @@ begin
   Close;
 end;
 
-
-procedure TMainForm.WipeBoxes;
-begin
-  Edit1.Text := '';
-  Edit2.Text := '';
-  Edit3.Text := '';
-  ActiveControl := Edit1;
-
-  CallSent := false;
-  NrSent := false;
-end;
-                                   
-
 procedure TMainForm.About1Click(Sender: TObject);
 const
   Msg = 'CW CONTEST SIMULATOR'#13#13 +
-        'Copyright (c) 2004-2006 Alex Shovkoplyas, VE3NEA'#13#13 +
-        'Portions Copyright (c) 2022 Zach Metzinger, N0ZGO'#13#13 +
-        've3nea@dxatlas.com, n0zgo@pobox.com'#13;
+   'Copyright (c) 2023 Torsten Clay, N4OGW rt_clay@bellsouth.net'#13#13 +
+   'Portions Copyright (c) 2004-2006 Alex Shovkoplyas, VE3NEA'#13#13 +
+   'Portions Copyright (c) 2022 Zach Metzinger, N0ZGO'#13;
 begin
-  Application.MessageBox(Msg, 'Morse Runner 1.68z', MB_OK or MB_ICONINFORMATION);
-end;          
+  Application.MessageBox(Msg, 'Morse Runner Server 1.00', MB_OK or MB_ICONINFORMATION);
+end;
 
 
 procedure TMainForm.Readme1Click(Sender: TObject);
 var
   FileName: string;
 begin
-  FileName := ExtractFilePath(ParamStr(0)) + 'readme.txt';
-   OpenDocument(PChar(FileName)); { *Converted from ShellExecute* }
+   FileName := '/usr/local/share/morserunner-server/Readme.txt';
+   OpenDocument(PChar(FileName)); 
 end;
-
-
-procedure TMainForm.Edit1Change(Sender: TObject);
-begin
-  if Edit1.Text = '' then NrSent := false;
-  if not Tst.Me.UpdateCallInMessage(Edit1.Text)
-    then CallSent := false;
-end;
-
-
-procedure TMainForm.RunMNUClick(Sender: TObject);
-begin
-  Run(TRunMode((Sender as TComponent).Tag));
-end;
-
-
-procedure TMainForm.Edit2Enter(Sender: TObject);
-begin
-  if Length(Edit2.Text) = 3 then
-    begin Edit2.SelStart := 1; Edit2.SelLength := 1; end;
-end;
-
-
 
 procedure TMainForm.EnableCtl(Ctl: TWinControl; AEnable: boolean);
 const
@@ -731,246 +544,73 @@ end;
 
 
 procedure TMainForm.Run(Value: TRunMode);
-const
-  Title: array[TRunMode] of string =
-    ('', 'Pile-Up', 'Single Calls', 'COMPETITION', 'H S T');
 var
-  BCompet, BStop: boolean;
+  BCompet, BStop : boolean;
+   i		 :  integer;
 begin
-  if Value = Ini.RunMode then Exit;
+  if Value = RunMode then Exit;
 
   BStop := Value = rmStop;
-  BCompet := Value in [rmWpx, rmHst];
   RunMode := Value;
 
-  //main ctls
-  EnableCtl(Edit4,  BStop);
-  EnableCtl(SpinEdit2, BStop);
-  SetToolbuttonDown(ToolButton1, not BStop);
-
-  //condition checkboxes
-  EnableCtl(CheckBox2, not BCompet);
-  EnableCtl(CheckBox3, not BCompet);
-  EnableCtl(CheckBox4, not BCompet);
-  EnableCtl(CheckBox5, not BCompet);
-  EnableCtl(CheckBox6, not BCompet);
-  if RunMode = rmWpx then
-    begin
-    CheckBox2.Checked := true;
-    CheckBox3.Checked := true;
-    CheckBox4.Checked := true;
-    CheckBox5.Checked := true;
-    CheckBox6.Checked := true;
-    SpinEdit2.Value := CompDuration;
-    end
-  else if RunMode = rmHst then
-    begin
-    CheckBox2.Checked := false;
-    CheckBox3.Checked := false;
-    CheckBox4.Checked := false;
-    CheckBox5.Checked := false;
-    CheckBox6.Checked := false;
-    SpinEdit2.Value := CompDuration;
-    end;
-
-  //button menu
-  PileupMNU.Enabled := BStop;
-  SingleCallsMNU.Enabled := BStop;
-  CompetitionMNU.Enabled := BStop;
-  HSTCompetition1.Enabled := BStop;
-  StopMNU.Enabled := not BStop;
-
-  //main menu
-  PileUp1.Enabled := BStop;
-  SingleCalls1.Enabled := BStop;
-  Competition1.Enabled := BStop;
-  HSTCompetition2.Enabled := BStop;
-  Stop1MNU.Enabled := not BStop;
-
-  Call1.Enabled := BStop;
-  Duration1.Enabled := BStop;
-  QRN1.Enabled := not BCompet;
-  QRM1.Enabled := not BCompet;
-  QSB1.Enabled := not BCompet;
-  Flutter1.Enabled := not BCompet;
-  Lids1.Enabled := not BCompet;
-
-
-
-  //hst specific
-  Activity1.Enabled := Value <> rmHst;
-  CWBandwidth2.Enabled := Value <> rmHst;
-
-  EnableCtl(SpinEdit3, RunMode <> rmHst);
-  if RunMode = rmHst then SpinEdit3.Value := 4;
-
-  EnableCtl(ComboBox2, RunMode <> rmHst);                
-  if RunMode = rmHst then begin ComboBox2.ItemIndex :=10; SetBw(10); end;
-
-  //if RunMode = rmHst then ListView1.Visible := false
-  //else if RunMode <> rmStop then ListView1.Visible := true;
-
-
-  //mode caption
-  Panel4.Caption := Title[Value];
-  if BCompet
-    then Panel4.Font.Color := clRed else Panel4.Font.Color := clGreen;
-
   if not BStop then
-    begin
-    Tst.Me.AbortSend;
-    Tst.BlockNumber := 0;
-    Tst.Me.Nr := 1;
+  begin
+     for i:=1 to 2 do
+     begin
+	Tst[i].Me.AbortSend;
+	Tst[i].BlockNumber := 0;
+	Tst[i].Me.Nr := 1;
+	CallSent[i] := false;
+	NrSent[i] := false;
+     end;
     Log.Clear;
-    WipeBoxes;
-    RichEdit1.Visible := true;
-    {! ?}Panel5.Update;
-    end;
+  end;
 
   if not BStop then IncRit(0);
-
-
-
-  if BStop
-    then
-      begin
-      if AlWavFile1.IsOpen then AlWavFile1.Close;
-      end
-    else
-      begin
-      AlWavFile1.FileName := ChangeFileExt(ParamStr(0), '.wav');
-      if SaveWav then AlWavFile1.OpenWrite;
-      end;
-
+   
   AlSoundOut1.Enabled := not BStop;
 end;
 
 
-
-procedure TMainForm.RunBtnClick(Sender: TObject);
+procedure TMainForm.startButtonChange(Sender: TObject);
 begin
-  if RunMode = rmStop
-    then Run(rmPileUp)
-    else Tst.FStopPressed := true;
+   if startButton.Checked = true then
+      begin
+	 if RunMode = rmStop then Run(rmRun)
+      end
+  else
+     begin
+	Tst[1].FStopPressed := true;
+	Tst[2].FStopPressed := true;
+     end;
 end;
 
-procedure TMainForm.WmTbDown(var Msg: TMessage);
-begin
-  TToolbutton(Msg.LParam).Down := Boolean(Msg.WParam);
-end;
-
-
-procedure TMainForm.SetToolbuttonDown(Toolbutton: TToolbutton;
-  ADown: boolean);
-begin
-  //Windows.PostMessage(Handle, WM_TBDOWN, Integer(ADown), Integer(Toolbutton));
-end;
-
-
-
-procedure TMainForm.PopupScoreWpx;
+procedure TMainForm.TrackBarChange(Sender: TObject);
 var
-  S, FName: string;
-  Score: integer;
+  Db: double;
 begin
-  S := Format('%s %s %s %s ', [
-    FormatDateTime('yyyy-mm-dd', Now),
-    Ini.Call,
-    ListView1.Items[0].SubItems[1],
-    ListView1.Items[1].SubItems[1]]);
-
-  S := S + '[' + IntToHex(CalculateCRC32(S, $C90C2086), 8) + ']';
-
-           
-  FName := ChangeFileExt(ParamStr(0), '.lst');
-  with TStringList.Create do
-    try
-      if FileExists(FName) then LoadFromFile(FName);
-      Add(S);
-      SaveToFile(FName);
-    finally Free; end;
-
-  ScoreDialog.Edit1.Text := S;
-
-
-  Score := StrToIntDef(ListView1.Items[2].SubItems[1], 0);
-  if Score > HiScore
-    then ScoreDialog.Height := 192
-    else ScoreDialog.Height := 129;
-  HiScore := Max(HiScore, Score);
-  ScoreDialog.ShowModal;
+  with Trackbar do
+  begin
+    //-70..+10 dB
+    Db := -70 + position * 8;
+    if dB > 0 then Hint := Format('+%.0f dB', [dB])
+    else
+      Hint := Format('%.0f dB', [dB]);
+  end;
 end;
 
-
-procedure TMainForm.PopupScoreHst;
-var
-  S: string;
-  FName: TFileName;
+procedure TMainForm.TrackBarClick(Sender: TObject);
 begin
-  S := Format('%s'#9'%s'#9'%s'#9'%s', [
-    FormatDateTime('yyyy-mm-dd hh:nn', Now),
-    Ini.Call,
-    Ini.HamName,
-    Panel11.Caption]);
 
-  FName := ExtractFilePath(ParamStr(0)) + 'HstResults.txt';
-  with TStringList.Create do
-    try
-      if FileExists(FName) then LoadFromFile(FName);
-      Add(S);
-      SaveToFile(FName);
-    finally Free; end;
-
-  ShowMessage('HST Score: ' + ListView1.Items[2].SubItems[1]);
 end;
-
-
-procedure OpenWebPage(Url: string);
-begin
-   OpenDocument(PChar(Url)); { *Converted from ShellExecute* }
-end;
-
-
-procedure TMainForm.ViewScoreBoardMNUClick(Sender: TObject);
-begin
-  OpenWebPage('http://www.dxatlas.com/MorseRunner/MrScore.asp');
-end;
-
-procedure TMainForm.ViewScoreTable1Click(Sender: TObject);
-var
-  FName: string;
-begin
-  RichEdit1.Clear;
-  FName := ChangeFileExt(ParamStr(0), '.lst');
-  if FileExists(FName)
-    then RichEdit1.Lines.LoadFromFile(FName)
-    else RichEdit1.Lines.Add('Your score table is empty');
-  RichEdit1.Visible := true;
-end;
-
-
-procedure TMainForm.Panel8MouseDown(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Integer);
-begin
-  if X < Shape2.Left then IncRit(-1)
-  else if X > (Shape2.Left + Shape2.Width) then IncRit(1);
-end;
-
-
-procedure TMainForm.Shape2MouseDown(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Integer);
-begin
-  IncRit(0);
-end;
-
 
 procedure TMainForm.IncRit(dF: integer);
 begin
   case dF of
-   -1: Inc(Ini.Rit, -50);
+    -1: Inc(Ini.Rit, -50);
     0: Ini.Rit := 0;
     1: Inc(Ini.Rit, 50);
-    end;
+  end;
 
   Ini.Rit := Min(500, Max(-500, Ini.Rit));
   UpdateRitIndicator;
@@ -979,73 +619,13 @@ end;
 
 procedure TMainForm.UpdateRitIndicator;
 begin
-  Shape2.Width := Ini.Bandwidth div 9;
-  Shape2.Left := ((Panel8.Width - Shape2.Width) div 2) + (Ini.Rit div 9);
-end;
-
-
-procedure TMainForm.Advance;
-begin
-  if not MustAdvance then Exit;
-
-   if Edit2.Text = '' then Edit2.Text := '599';
-
-
-  if Pos('?', Edit1.Text) = 0 then
-  begin
-     ActiveControl := Edit3;
-  end
-  else if ActiveControl = Edit1 then
-     begin
-	Edit1Enter(nil);
-     end
-  else
-     ActiveControl := Edit1;
-   
-  MustAdvance := false;
 
 end;
-
-
-
-procedure TMainForm.VolumeSliderDblClick(Sender: TObject);
-begin
-  with Sender as TVolumeSlider do
-    begin
-    Value := 0.75;
-    OnChange(Sender);
-    end;
-end;
-
-procedure TMainForm.VolumeSlider1Change(Sender: TObject);
-begin
-  with VolumeSlider1 do
-    begin
-    //-60..+20 dB
-    Db := 80 * (Value - 0.75);
-    if dB > 0
-      then Hint := Format('+%.0f dB', [dB])
-      else Hint := Format( '%.0f dB', [dB]);
-    end;
-end;
-
-
-procedure TMainForm.WebPage1Click(Sender: TObject);
-begin
-  OpenWebPage('http://www.dxatlas.com/MorseRunner');
-end;
-
-
 
 
 //------------------------------------------------------------------------------
 //                              accessibility
 //------------------------------------------------------------------------------
-procedure TMainForm.Call1Click(Sender: TObject);
-begin
-  SetMyCall(Trim(InputBox('Callsign', 'Callsign', Edit4.Text)));
-end;
-
 
 procedure TMainForm.SetQsk(Value: boolean);
 begin
@@ -1065,7 +645,8 @@ begin
   Wpm := (Sender as TMenuItem).Tag;
   Wpm := Max(10, Min(120, Wpm));
   SpinEdit1.Value := Wpm;
-  Tst.Me.Wpm := Wpm;
+  Tst[1].Me.Wpm := Wpm;
+  Tst[2].Me.Wpm := Wpm;
 end;
 
 
@@ -1086,33 +667,12 @@ var
   Stp: boolean;
 begin
   Stp := RunMode = rmStop;
-
-  AudioRecordingEnabled1.Enabled := Stp;
-  PlayRecordedAudio1.Enabled := Stp and FileExists(ChangeFileExt(ParamStr(0), '.wav'));
-
-  AudioRecordingEnabled1.Checked := Ini.SaveWav;
 end;
-
-procedure TMainForm.PlayRecordedAudio1Click(Sender: TObject);
-var
-  FileName: string;
-begin
-  FileName := ChangeFileExt(ParamStr(0), '.wav');
-   OpenDocument(PChar(FileName)); { *Converted from ShellExecute* }
-end;
-
-
-procedure TMainForm.AudioRecordingEnabled1Click(Sender: TObject);
-begin
-  Ini.SaveWav := not Ini.SaveWav;
-end;
-
-
 
 procedure TMainForm.SelfMonClick(Sender: TObject);
 begin
-  VolumeSlider1.Value := (Sender as TMenuItem).Tag / 80 + 0.75;
-  VolumeSlider1.OnChange(Sender);
+   MainForm.TrackBar.position := Round(((Sender as TMenuItem).Tag + 60) / 8);
+   TrackBarChange(Sender);
 end;
 
 procedure TMainForm.Settings1Click(Sender: TObject);
@@ -1147,31 +707,311 @@ begin
   SpinEdit3.Value := Ini.Activity;
 end;
 
-
-procedure TMainForm.Duration1Click(Sender: TObject);
+procedure TMainForm.so2rminiInit();
 begin
-  Ini.Duration := (Sender as TMenuItem).Tag;
-  SpinEdit2.Value := Ini.Duration;
+  if serialInput.InstanceActive = True then
+      serialInput.closeSocket;
+   
+  serialInput.LinuxLock := False;
+  serialInput.Connect(Ini.serialPort);
+  serialInput.config(19200, 8, 'N', SB1, False, False);
+  if serialInput.lastError <> 0 then
+  begin
+    WriteLn('error opening ', serialPort);
+    WriteLn(serialInput.GetErrorDesc(serialInput.LastError));
+    so2rMiniStatus := False;
+  end     
+  else
+  begin
+    WriteLn('connected to ', Ini.serialPort);
+    so2rMiniStatus := True;
+    serialInput.LinuxLock := False;
+  end;
+
+  serialPtr := 0;
+  serialOutPtr := 0;
+  so2rMiniPtr := 0;
+  so2rMiniOutPtr := 0;
+  cwBuffer[1] := '';
+  cwBuffer[2] := '';
+  so2rMiniCmd := 0;
+  stopSent[1] := True;
+  stopSent[2] := True;
 end;
 
-
-procedure TMainForm.Operator1Click(Sender: TObject);
+// check for characters on serial port
+procedure TMainForm.checkSerial(sender : TObject) ; 
 begin
-  HamName := InputBox('HST Operator', 'Enter operator''s name', HamName);
-
-  if HamName <> ''
-    then Caption := 'Morse Runner:  ' + HamName
-    else Caption := 'Morse Runner';
-
-  with TIniFile.Create(ChangeFileExt(ParamStr(0), '.ini')) do
-    try WriteString(SEC_STN, 'Name', HamName);
-    finally Free; end;
+  if so2rMiniStatus = false then
+     exit;
+   
+  while serialInput.CanReadEx(0) = True do
+  begin
+    serialBuffer[serialPtr] := serialInput.RecvByte(0);
+    serialPtr := serialPtr + 1;
+    serialPtr := serialPtr mod 128;
+  end;
+   
+  while ( (so2rminiOutPtr <> serialOutPtr) and (serialInput.CanWrite(0) = true) ) do
+  begin
+      serialInput.SendByte(serialOutBuffer[so2rminiOutPtr]);
+      so2rminiOutPtr := so2rminiOutPtr + 1;
+      so2rminiOutPtr := so2rminiOutPtr mod 128;
+  end;   
+  so2rmini;
+  if runMode = rmRun then
+      so2rminiCW;
 end;
 
-procedure TMainForm.StopMNUClick(Sender: TObject);
+// send cw messages
+procedure TMainForm.so2rminiCW; 
+var
+   i		    : integer;
+  i0, i1, i2, cmdNr : integer;
+  firstPart	    : string;
 begin
-  Tst.FStopPressed := true;
+   for i:=1 to 2 do
+      begin
+	 if Length(cwBuffer[i]) = 0 then
+	    Continue;
+
+	 cmdNr := 0;
+	 i0 := 1;
+	 i2 := 0;
+	 while true do
+	 begin
+	    // find any complete -xx- commands and remove them 
+	    i1 := Pos('-', cwBuffer[i], i0);
+	    i2 := Pos('-', cwBuffer[i], i1 + 1);
+	    if ((i1 <> 0) and (i2 <> 0) and ((i2 - i1) = 3)) then
+	    begin
+	       cmdNr := (byte(cwBuffer[i][i1 + 2]) - 48) + (byte(cwBuffer[i][i1 + 1]) - 48) * 10;
+	       // save text before, needed to ID callsign
+	       firstPart := Copy(cwBuffer[i],1,i1-1);
+	       delete(cwBuffer[i],i1,4);
+	       // act on cmdNr
+	       case cmdNr of
+		 0: Tst[i].Me.Msg := [msgNone];
+		 1:
+		   begin
+		      Tst[i].Me.Msg := [msgCQ];
+		      NRSent[i] := False;
+		      CallSent[i] := False;
+		   end;
+		 2:
+		   begin
+		      Include(Tst[i].Me.Msg, msgNR);
+		      NrSent[i] := True;
+		   end;
+		 3: 
+		    begin
+		       Tst[i].Me.Msg := [msgCQ, msgTU];
+		    end;
+		 4: Tst[i].Me.Msg := [msgMyCall];
+		 5:
+		   begin
+		      Exclude(Tst[i].Me.Msg, msgCQ);
+		      Exclude(Tst[i].Me.Msg, msgTU);
+		      Include(Tst[i].Me.Msg, msgHisCall);
+		      CallSent[i] := True;
+		      Tst[i].Me.HisCall := firstPart;
+		   end;
+		 6: Tst[i].Me.Msg := [msgB4];
+		 7: Tst[i].Me.Msg := [msgQm];
+		 8: Tst[i].Me.Msg := [msgNil];
+		 9: Tst[i].Me.Msg := [msgGarbage];
+		 10: Tst[i].Me.Msg := [msgR_NR];
+		 11: Tst[i].Me.Msg := [msgR_NR2];
+		 12: Tst[i].Me.Msg := [msgDeMyCall1];
+		 13: Tst[i].Me.Msg := [msgDeMyCall2];
+		 14: Tst[i].Me.Msg := [msgDeMyCallNr1];
+		 15: Tst[i].Me.Msg := [msgDeMyCallNr2];
+		 16: Tst[i].Me.Msg := [msgNrQm];
+		 17: Tst[i].Me.Msg := [msgLongCQ];
+		 18: Tst[i].Me.Msg := [msgMyCallNr2];
+		 19: Tst[i].Me.Msg := [msgQrl];
+		 20: Tst[i].Me.Msg := [msgQrl2];
+		 21: Tst[i].Me.Msg := [msgQsy];
+		 22: Tst[i].Me.Msg := [msgAgn];
+	       end;
+	       i0 := 1;
+	       i2 := 0;
+	    end
+	    else if ( (i1 <> 0) and (i2 = 0) ) then
+	    begin
+	       // cw message not fully loaded, exit
+	       exit;
+	    end
+	    else
+	    begin
+	       // found all -xx- in this text, can send the rest 
+	       break;
+	    end;
+	 end;
+	 if so2rMiniStatus = True then
+	 begin
+	    serialOutBuffer[serialOutPtr] := i;
+	    serialOutPtr := serialOutPtr + 1;
+	    serialOutPtr := serialOutPtr mod 128;
+	    stopSent[i] := False;
+	 end;
+	 Tst[i].Me.SendText(cwBuffer[i]);
+	 cwBuffer[i] := '';
+      end;
+end;
+
+// process so2rmini-N6TR commands
+procedure TMainForm.so2rmini;
+var
+  i	    :  integer;
+  b,b2	    : byte;
+  cmd	    : byte;
+  const ver : Pchar = 'TRCW V4';
+begin
+  // check if cw stopped sending and send so2rmini byte
+  if ((stopSent[1] = False) and ((Tst[1].Me.State = stListening) or
+    (Tst[1].Me.State = stCopying))) then
+  begin
+    serialOutBuffer[serialOutPtr] := $00;
+    serialOutPtr := serialOutPtr + 1;
+    serialOutPtr := serialOutPtr mod 128;
+    stopSent[1] := True;
+  end;
+  if ((stopSent[2] = False) and ((Tst[2].Me.State = stListening) or
+    (Tst[2].Me.State = stCopying))) then
+  begin
+     serialOutBuffer[serialOutPtr] := $00;
+     serialOutPtr := serialOutPtr + 1;
+     serialOutPtr := serialOutPtr mod 128;
+     stopSent[2] := True;
+  end;
+
+  while so2rMiniPtr <> serialPtr do
+  begin
+    b := serialBuffer[so2rMiniPtr];
+    so2rMiniPtr := so2rMiniPtr + 1;
+    so2rMiniPtr := so2rMiniPtr mod 128;
+
+    // already a command, byte b is argument of command
+    if so2rMiniCmd <> 0 then
+    begin
+      case so2rMiniCmd of
+        $02:
+	begin
+	   // audio control: lower two bits
+	   // bit0   bit1
+	   //    0    x    : both channels to radio 1
+	   //    1    0    : both channels to radio 2
+	   //    1    1    : split audio
+	   b2 := (b and 3);
+	   if b2 = 1 then
+	      AlSoundOut1.SetChannel(1)
+	   else if b2 = 3 then
+	      AlSoundOut1.SetChannel(2)
+	   else
+	      AlSoundOut1.SetChannel(0);
+	end;
+        $03:
+        begin
+          // set CW pitch : gives some problems
+	  //if ( (b>= 30) and (b <= 90)) then
+	  //   SetPitch(b * 10);
+        end;
+	$04:; //WriteLn('Paddle tone byte');
+	$05:; //WriteLn('Paddle pin byte');
+	$06:; //WriteLn('Keyer weight byte');
+	$07:; //WriteLn('CW char offset byte');
+	$08:  //WriteLn('CW speed byte');
+        begin
+	  if ( (b >= 10) and (b <= 60) ) then
+	     begin
+		SpinEdit1.Value := b;
+		Tst[1].Me.Wpm := b;
+		Tst[2].Me.Wpm := b;
+	     end;
+        end;
+	$09:; //WriteLn('Paddle speed byte');
+	$0A:; //WriteLn('PTT on byte');
+        $0B: 
+	begin
+	   //WriteLn('Radio select byte');
+	   if b = $01 then
+	      radioNrTx := 1
+	   else
+	      radioNrTx := 2;
+	end;   
+	$0E:; //WriteLn('PTT assert time byte');
+	$0F:; //WriteLn('PTT hold time byte');
+	$10:; //WriteLn('PTT hold paddle time  byte');
+	$14:; //WriteLn('Curtis mode byte');
+	$15:; //WriteLn('Paddle bug mode byte');
+	$16:; //WriteLn('PTT enable byte');
+	$17:; //WriteLn('Tune with dits byte');
+	$18:; //WriteLn('Farnsworth speed byte');
+	$19:; //WriteLn('Footswitch byte');
+      end;
+      so2rMiniCmd := 0;
+      b := 0;
+    end;
+
+    // cw characters: add to send buffer if on this radio
+    // 59 is ; which can also be commands
+    if ( (RunMode = rmRun) and (b >= 32)) then 
+    begin
+      cwBuffer[radioNrTx] := cwBuffer[radioNrTx] + chr(b);
+      continue;
+    end;
+
+     
+    // commands
+    case b of
+      // send version
+      $01			   : 
+      begin
+	 for i:= 0 to 6 do
+	 begin
+	   serialOutBuffer[serialOutPtr] := Byte(ver[i]);
+	   serialOutPtr := serialOutPtr + 1;
+	   serialOutPtr := serialOutPtr mod 128;
+	 end;
+      end;
+      // cancel CW
+      $12, $13			   : 
+      begin
+        if msgHisCall in Tst[1].Me.Msg then CallSent[1] := False;
+        if msgHisCall in Tst[2].Me.Msg then CallSent[2] := False;
+	if msgNR in Tst[1].Me.Msg then NrSent[1] := False;
+	if msgNR in Tst[2].Me.Msg then NrSent[2] := False;
+	Tst[1].Me.AbortSend;
+        Tst[2].Me.AbortSend;
+      end;
+      $11			   : // query footswitch
+      begin
+	 serialOutBuffer[serialOutPtr] := 0;
+	 serialOutPtr := serialOutPtr + 1;
+	 serialOutPtr := serialOutPtr mod 128;
+      end;
+      $0c, $0d			   : // CW being sent query, number chars in buffer
+      begin
+	 serialOutBuffer[serialOutPtr] := 0;
+	 serialOutPtr := serialOutPtr + 1;
+	 serialOutPtr := serialOutPtr mod 128;
+      end;
+      $1a, $1b			   : // delete last char
+      begin
+	 serialOutBuffer[serialOutPtr] := 0;
+	 serialOutPtr := serialOutPtr + 1;
+	 serialOutPtr := serialOutPtr mod 128;
+      end;
+      // these commands have an argument; set cmd to this byte, next byte
+      // will be interpreted as argument. $3b is ';'
+      $02, $03, $04, $05, $06, $07, $08, $09, $0A, $0B, $0E, $0F, $10,
+      $14, $15, $16, $17, $18, $19 :
+      begin
+        so2rMiniCmd := b;
+      end;
+    end;
+  end;
 end;
 
 end.
-

@@ -24,38 +24,29 @@ const
 
 
 type
-  TRunMode = (rmStop, rmPileup, rmSingle, rmWpx, rmHst);
-  
+  TRunMode = (rmStop, rmRun);
+  TOpMode  = (opWpx, opCab);
+   
 var
-  Call: string = 'VE3NEA';
-  HamName: string;
-  Wpm: integer = 30;
-  BandWidth: integer = 500;
-  Pitch: integer = 600;
-  Qsk: boolean = true;
-  Rit: integer = 0;
-  BufSize: integer = DEFAULTBUFSIZE;
-
-  Activity: integer = 2;
-  Qrn: boolean = true;
-  Qrm: boolean = true;
-  Qsb: boolean = true;
-  Flutter: boolean = true;
-  Lids: boolean = true;
-
-  Duration: integer = 30;
-  RunMode: TRunMode = rmStop;
-  HiScore: integer;
-  CompDuration: integer = 60;
-
-  SaveWav: boolean = false;
-  CallsFromKeyer: boolean = false;
-
+  Wpm	     : integer = 30;
+  BandWidth  : integer = 500;
+  Pitch	     : integer = 500;
+  Qsk	     : boolean = False;
+  Rit	     : integer = 0;
+  BufSize    : integer = DEFAULTBUFSIZE;
+  Activity   : integer = 2;
+  Qrn	     : boolean = True;
+  Qrm	     : boolean = True;
+  Qsb	     : boolean = True;
+  Flutter    : boolean = True;
+  Lids	     : boolean = True;
+  OpMode     : TOpMode = opWpx;
+  RunMode    : TRunMode = rmStop;
+  serialPort : string = '/tmp/pty1';
+  cabFile    : string = '';
 
 procedure FromIni;
 procedure ToIni;
-
-
 
 implementation
 
@@ -66,24 +57,22 @@ procedure FromIni;
 var
   V: integer;
 begin
-  with TIniFile.Create(ChangeFileExt(ParamStr(0), '.ini')) do
+   with TIniFile.Create(GetUserDir+'.local/share/morserunner-server/morserunner-server.ini') do
     try
-      MainForm.SetMyCall(ReadString(SEC_STN, 'Call', Call));
-      MainForm.SetPitch(ReadInteger(SEC_STN, 'Pitch', 3));
+      MainForm.SetPitch(ReadInteger(SEC_STN, 'Pitch', 4));
       MainForm.SetBw(ReadInteger(SEC_STN, 'BandWidth', 9));
-
-      HamName := ReadString(SEC_STN, 'Name', '');
-      if HamName <> '' then
-        MainForm.Caption := MainForm.Caption + ':  ' + HamName;
 
       Wpm := ReadInteger(SEC_STN, 'Wpm', Wpm);
       Wpm := Max(10, Min(120, Wpm));
       MainForm.SpinEdit1.Value := Wpm;
-      Tst.Me.Wpm := Wpm;
-
+      Tst[1].Me.Wpm := Wpm;
+      Tst[2].Me.Wpm := Wpm;
+  
       MainForm.SetQsk(ReadBool(SEC_STN, 'Qsk', Qsk));
-      CallsFromKeyer := ReadBool(SEC_STN, 'CallsFromKeyer', CallsFromKeyer);
-
+      V := ReadInteger(SEC_STN, 'SelfMonVolume', -44);
+      MainForm.TrackBar.position := Round((V + 70) / 8);
+      MainForm.setPort(ReadString(SEC_STN, 'serialPort', '/tmp/pty1'));
+   
       Activity := ReadInteger(SEC_BND, 'Activity', Activity);
       MainForm.SpinEdit3.Value := Activity;
 
@@ -94,24 +83,28 @@ begin
       MainForm.CheckBox6.Checked := ReadBool(SEC_BND, 'Lids', Lids);
       MainForm.ReadCheckBoxes;
 
-      Duration := ReadInteger(SEC_TST, 'Duration', Duration);
-      MainForm.SpinEdit2.Value := Duration;
-      HiScore := ReadInteger(SEC_TST, 'HiScore', HiScore);
-      CompDuration := Max(1, Min(60, ReadInteger(SEC_TST, 'CompetitionDuration', CompDuration)));
-
       //buffer size
       V := ReadInteger(SEC_SYS, 'BufSize', 0);
       if V = 0 then
-        begin V := 3; WriteInteger(SEC_SYS, 'BufSize', V); end;
+      begin
+        V := 3;
+        WriteInteger(SEC_SYS, 'BufSize', V);
+      end;
       V := Max(1, Min(5, V));
       BufSize := 64 shl V;
-      Tst.Filt.SamplesInInput := BufSize;
-      Tst.Filt2.SamplesInInput := BufSize;
+      Tst[1].Filt.SamplesInInput := BufSize;
+      Tst[1].Filt2.SamplesInInput := BufSize;
+      Tst[2].Filt.SamplesInInput := BufSize;
+      Tst[2].Filt2.SamplesInInput := BufSize;
 
-      V := ReadInteger(SEC_STN, 'SelfMonVolume', 0);
-      MainForm.VolumeSlider1.Value := V / 80 + 0.75;
+      cabFile := ReadString(SEC_TST, 'CabrilloFile', '');
+      MainForm.setCabrillo(cabFile);
+      case ReadInteger(SEC_TST, 'Mode', 0) of
+	0 : opMode := opWPX;
+	1 : opMode := opCab;
+      end;
+      MainForm.SetMode(opMode);
 
-      SaveWav := ReadBool(SEC_STN, 'SaveWav', SaveWav);
     finally
       Free;
     end;
@@ -122,36 +115,30 @@ procedure ToIni;
 var
   V: integer;
 begin
-  with TIniFile.Create(ChangeFileExt(ParamStr(0), '.ini')) do
+   ForceDirectories(GetUserDir+'.local/share/morserunner-server');
+   with TIniFile.Create(GetUserDir+'.local/share/morserunner-server/morserunner-server.ini') do
     try
-      WriteString(SEC_STN, 'Call', Call);
       WriteInteger(SEC_STN, 'Pitch', MainForm.ComboBox1.ItemIndex);
       WriteInteger(SEC_STN, 'BandWidth', MainForm.ComboBox2.ItemIndex);
       WriteInteger(SEC_STN, 'Wpm', Wpm);
       WriteBool(SEC_STN, 'Qsk', Qsk);
-
+      WriteInteger(SEC_STN, 'SelfMonVolume', Round(-70 + MainForm.TrackBar.position * 8));
+      WriteString(SEC_STN, 'serialPort', serialPort);
       WriteInteger(SEC_BND, 'Activity', Activity);
       WriteBool(SEC_BND, 'Qrn', Qrn);
       WriteBool(SEC_BND, 'Qrm', Qrm);
       WriteBool(SEC_BND, 'Qsb', Qsb);
       WriteBool(SEC_BND, 'Flutter', Flutter);
       WriteBool(SEC_BND, 'Lids', Lids);
+      WriteString(SEC_TST,'CabrilloFile', CabFile);
+      case opMode of
+	opWPX : WriteInteger(SEC_TST, 'mode', 0);
+	opCab : WriteInteger(SEC_TST, 'mode', 1);
+      end;
 
-      WriteInteger(SEC_TST, 'Duration', Duration);
-      WriteInteger(SEC_TST, 'HiScore', HiScore);
-      WriteInteger(SEC_TST, 'CompetitionDuration', CompDuration);
-
-      V := Round(80 * (MainForm.VolumeSlider1.Value - 0.75));
-      WriteInteger(SEC_STN, 'SelfMonVolume', V);
-
-      WriteBool(SEC_STN, 'SaveWav', SaveWav);
     finally
       Free;
     end;
 end;
 
-
-
-
 end.
-

@@ -17,43 +17,48 @@ const
 
 type
   TByteArray = array of byte;
-  TSmallIntArray = array of SmallInt;
+  TSmallIntArray = array of smallint;
   TIntegerArray = array of integer;
-  TSingleArray = array of Single;
+  TSingleArray = array of single;
   TSingleArray2D = array of TSingleArray;
-  TDoubleArray = array of Double;
-  TBooleanArray = array of Boolean;
-  TExtendedArray = array of Extended;
+  TDoubleArray = array of double;
+  TBooleanArray = array of boolean;
+  TExtendedArray = array of extended;
   PSingleArray = array of PSingle;
 
   TDataBufferF = array of TSingleArray;
   TDataBufferI = array of TIntegerArray;
 
   PHugeSingleArray = ^THugeSingleArray;
-  THugeSingleArray = array[0..(MAXINT div SizeOf(Single)) -1] of Single;
+  THugeSingleArray = array[0..(MAXINT div SizeOf(single)) - 1] of single;
 
   PComplex = ^TComplex;
+
   TComplex = record
-    Re, Im: Single;
-    end;
+    Re, Im: single;
+  end;
 
   TComplexArray = array of TComplex;
 
   TCplArr = array[0..MAXINT shr 8] of TComplex;
-  PComplexArray= ^TCplArr;
+  PComplexArray = ^TCplArr;
 
-  TReImArrays = record Re, Im: TSingleArray; end;
+  TReImArrays = record
+    Re, Im: TSingleArray;
+  end;
 
-  ESoundError = class (Exception) end;
+  ESoundError = class(Exception)
+  end;
 
 
 
   PWaveBuffer = ^TWaveBuffer;
+
   TWaveBuffer = record
-    used   : integer;
-    len    : integer;		  
-    Data   : TSmallIntArray;
-    end;	       
+    used: integer;
+    len: integer;
+    Data: TSmallIntArray;
+  end;
 
 procedure SetLengthReIm(var Arr: TReImArrays; Len: integer);
 procedure ClearReIm(var Arr: TReImArrays);
@@ -69,10 +74,10 @@ end;
 
 procedure ClearReIm(var Arr: TReImArrays);
 begin
-  Arr.Re := nil; Arr.Im := nil;
+  Arr.Re := nil;
+  Arr.Im := nil;
 end;
 
 
 
 end.
-

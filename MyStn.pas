@@ -10,7 +10,7 @@ unit MyStn;
 interface
 
 uses
-  SysUtils, Classes, Station, RndFunc, Ini, SndTypes, MorseKey;
+  SysUtils, Classes, Station, Ini, SndTypes, MorseKey;
 
 type
   TMyStation = class(TStation)
@@ -19,7 +19,8 @@ type
     procedure AddToPieces(AMsg: string);
     procedure SendNextPiece;
   public
-    constructor CreateStation;
+    radioNr: integer;
+    constructor CreateStation(nr : integer);
     destructor Destroy; override;
     procedure Init;
     procedure ProcessEvent(AEvent: TStationEvent); override;
@@ -37,9 +38,10 @@ uses
 
 { TMyStation }
 
-constructor TMyStation.CreateStation;
+    constructor TMyStation.CreateStation(nr : integer) ;
 begin
   inherited Create(nil);
+  radioNr := nr;
   Pieces := TStringList.Create;
   Init;
 end;
@@ -54,7 +56,7 @@ end;
 
 procedure TMyStation.Init;
 begin
-  MyCall := Ini.Call;
+  MyCall := '';//Ini.Call;
   NR := 1;
   RST := 599;
   Pitch := Ini.Pitch;
@@ -65,7 +67,7 @@ end;
 
 procedure TMyStation.ProcessEvent(AEvent: TStationEvent);
 begin
-  if AEvent = evMsgSent then Tst.OnMeFinishedSending;
+  if AEvent = evMsgSent then Tst[radioNr].OnMeFinishedSending;
 end;
 
 
@@ -84,10 +86,10 @@ procedure TMyStation.SendText(AMsg: string);
 begin
   AddToPieces(AMsg);
   if State <> stSending then
-    begin
+  begin
     SendNextPiece;
-    Tst.OnMeStartedSending;
-    end;
+    Tst[radioNr].OnMeStartedSending;
+  end;
 end;
 
 
@@ -99,15 +101,15 @@ begin
   //special processing of callsign
   p := Pos('<his>', AMsg);
   while p > 0 do
-    begin
-    Pieces.Add(Copy(AMsg, 1, p-1));
+  begin
+    Pieces.Add(Copy(AMsg, 1, p - 1));
     Pieces.Add('@');  //his callsign indicator
-    Delete(AMsg, 1, p+4);
+    Delete(AMsg, 1, p + 4);
     p := Pos('<his>', AMsg);
-    end;
+  end;
   Pieces.Add(AMsg);
 
-  for i:= Pieces.Count-1 downto 0 do
+  for i := Pieces.Count - 1 downto 0 do
     if Pieces[i] = '' then Pieces.Delete(i);
 end;
 
@@ -117,8 +119,8 @@ begin
   MsgText := '';
 
   if Pieces[0] <> '@' then inherited SendText(Pieces[0])
-  else if CallsFromKeyer and (not (RunMode in [rmHst, rmWpx])) then inherited SendText(' ')
-  else inherited SendText(HisCall);
+  else 
+    inherited SendText(HisCall);
 end;
 
 
@@ -127,12 +129,10 @@ function TMyStation.GetBlock: TSingleArray;
 begin
   Result := inherited GetBlock;
   if Envelope = nil then
-    begin
+  begin
     Pieces.Delete(0);
     if Pieces.Count > 0 then SendNextPiece;
-    //cursor to exchange field
-    MainForm.Advance;
-    end;
+  end;
 end;
 
 
@@ -141,7 +141,7 @@ var
   NewEnvelope: TSingleArray;
   i: integer;
 begin
-  Result := false;
+  Result := False;
   if ACall = '' then Exit;
   NewEnvelope := nil;
 
@@ -150,45 +150,44 @@ begin
 
   //is the already sent part of the call the same as in the new call?
   if Result then
-    begin
+  begin
     //create new envelope
     Keyer.Wpm := Wpm;
     Keyer.MorseMsg := Keyer.Encode(ACall);
     NewEnvelope := Keyer.Envelope;
-    for i:=0 to High(NewEnvelope) do
+    for i := 0 to High(NewEnvelope) do
       NewEnvelope[i] := NewEnvelope[i] * Amplitude;
-      
+
     //compare to the old one
     Result := Length(NewEnvelope) >= SendPos;
     if Result then
-      for i:=0 to SendPos-1 do
-        begin
+      for i := 0 to SendPos - 1 do
+      begin
         Result := Envelope[i] = NewEnvelope[i];
         if not Result then Break;
-        end;
+      end;
 
     //update
     if Result then
-      begin
+    begin
       Envelope := NewEnvelope;
       HisCall := ACall;
-      end;
     end;
+  end;
 
 
   //could not correct the current message
   //but another call is scheduled for sending
   if not Result then
-    for i:=1 to Pieces.Count-1 do
+    for i := 1 to Pieces.Count - 1 do
       if Pieces[i] = '@' then
-        begin
-        Result := true;
+      begin
+        Result := True;
         HisCall := ACall;
         Exit;
-        end;
+      end;
 end;
 
 
 
 end.
-

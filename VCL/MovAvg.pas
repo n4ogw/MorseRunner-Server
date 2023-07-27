@@ -10,7 +10,8 @@ unit MovAvg;
 interface
 
 uses
-  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics,
+  Controls, Forms, Dialogs,
   SndTypes, Math;
 
 type
@@ -21,9 +22,9 @@ type
     FSamplesInInput: integer;
 
     BufRe, BufIm: array of TSingleArray;
-    FNorm: Single;
+    FNorm: single;
     FDecimateFactor: integer;
-    FGainDb: Single;
+    FGainDb: single;
 
     procedure SetPasses(const Value: integer);
     procedure SetPoints(const Value: integer);
@@ -35,7 +36,7 @@ type
     function GetResult(const Src: TSingleArray): TSingleArray;
     function DoFilter(AData: TSingleArray;
       var ABuf: array of TSingleArray): TSingleArray;
-    procedure SetGainDb(const Value: Single);
+    procedure SetGainDb(const Value: single);
     procedure CalcScale;
   public
     constructor Create(AOwner: TComponent); override;
@@ -47,7 +48,7 @@ type
     property Passes: integer read FPasses write SetPasses;
     property SamplesInInput: integer read FSamplesInInput write SetSamplesInInput;
     property DecimateFactor: integer read FDecimateFactor write SetDecimateFactor;
-    property GainDb: Single read FGainDb write SetGainDb;
+    property GainDb: single read FGainDb write SetGainDb;
   end;
 
 procedure Register;
@@ -86,8 +87,8 @@ begin
   BufRe := nil;
   BufIm := nil;
   //one buf for the input data and one for each pass
-  SetLength(BufRe, FPasses+1, FSamplesInInput + FPoints);
-  SetLength(BufIm, FPasses+1, FSamplesInInput + FPoints);
+  SetLength(BufRe, FPasses + 1, FSamplesInInput + FPoints);
+  SetLength(BufIm, FPasses + 1, FSamplesInInput + FPoints);
 
   //recalculate scaling factor
   CalcScale;
@@ -97,9 +98,8 @@ end;
 procedure TMovingAverage.CalcScale;
 begin
   //(gain, db to linear) * (averaging factor)
-  FNorm := Power(10, 0.05*FGainDb) * IntPower(FPoints, -FPasses);
+  FNorm := Power(10, 0.05 * FGainDb) * IntPower(FPoints, -FPasses);
 end;
-
 
 
 
@@ -133,12 +133,11 @@ begin
 end;
 
 
-procedure TMovingAverage.SetGainDb(const Value: Single);
+procedure TMovingAverage.SetGainDb(const Value: single);
 begin
   FGainDb := Value;
   CalcScale;
 end;
-
 
 
 
@@ -160,18 +159,18 @@ end;
 
 
 //called internally
-function TMovingAverage.DoFilter(AData: TSingleArray; var ABuf: array of TSingleArray): TSingleArray;
+function TMovingAverage.DoFilter(AData: TSingleArray;
+  var ABuf: array of TSingleArray): TSingleArray;
 var
   i: integer;
 begin
   //put new data at the end of the 0-th buffer
   PushArray(AData, ABuf[0]);
   //multi-pass
-  for i:=1 to FPasses do Pass(ABuf[i-1], ABuf[i]);
+  for i := 1 to FPasses do Pass(ABuf[i - 1], ABuf[i]);
   //the sums are in the last buffer now, normalize and decimate result
   Result := GetResult(ABuf[FPasses]);
 end;
-
 
 
 
@@ -184,16 +183,16 @@ var
   Len: integer;
 begin
   //shift existing data to the left and append new data
-  Len := Length(Dst)-Length(Src);
-  Move(Dst[Length(Src)], Dst[0], Len * SizeOf(Single));
-  Move(Src[0], Dst[Len], Length(Src) * SizeOf(Single));
+  Len := Length(Dst) - Length(Src);
+  Move(Dst[Length(Src)], Dst[0], Len * SizeOf(single));
+  Move(Src[0], Dst[Len], Length(Src) * SizeOf(single));
 end;
 
 
 procedure TMovingAverage.ShiftArray(var Dst: TSingleArray; Count: integer);
 begin
   //shift data to the left
-  Move(Dst[Count], Dst[0], (Length(Dst)-Count) * SizeOf(Single));
+  Move(Dst[Count], Dst[0], (Length(Dst) - Count) * SizeOf(single));
 end;
 
 
@@ -204,8 +203,8 @@ begin
   //make some free space in the buffer
   ShiftArray(Dst, FSamplesInInput);
   //calculate moving average recursively
-  for i:=FPoints to High(Src) do
-    Dst[i] := Dst[i-1] - Src[i-FPoints] + Src[i];
+  for i := FPoints to High(Src) do
+    Dst[i] := Dst[i - 1] - Src[i - FPoints] + Src[i];
 end;
 
 
@@ -214,22 +213,21 @@ var
   i: integer;
 begin
   if FDecimateFactor = 1 //save a few cycles on Decimation
-    then
-      begin
-      SetLength(Result, FSamplesInInput);
-      for i:=0 to High(Result) do
-        Result[i] := Src[FPoints + i] * FNorm;
-      end
-    else
-      begin
-      SetLength(Result, FSamplesInInput div FDecimateFactor);
-      for i:=0 to High(Result) do
-        Result[i] := Src[FPoints + i * FDecimateFactor] * FNorm;
-      end;
+  then
+  begin
+    SetLength(Result, FSamplesInInput);
+    for i := 0 to High(Result) do
+      Result[i] := Src[FPoints + i] * FNorm;
+  end
+  else
+  begin
+    SetLength(Result, FSamplesInInput div FDecimateFactor);
+    for i := 0 to High(Result) do
+      Result[i] := Src[FPoints + i * FDecimateFactor] * FNorm;
+  end;
 end;
 
 
 
 
 end.
-

@@ -24,7 +24,7 @@ var
 implementation
 
 
-function CompareCalls(Item1, Item2: Pointer): Integer;
+function CompareCalls(Item1, Item2: Pointer): integer;
 begin
   Result := StrComp(PChar(Item1), PChar(Item2));
 end;
@@ -34,7 +34,7 @@ const
   Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/';
   CHRCOUNT = Length(Chars);
   INDEXSIZE = Sqr(CHRCOUNT) + 1;
-  INDEXBYTES = INDEXSIZE * SizeOf(Integer);
+  INDEXBYTES = INDEXSIZE * SizeOf(integer);
 var
   i: integer;
   P, Pe: PChar;
@@ -43,22 +43,30 @@ var
   FileName: string;
   FFileSize: integer;
 
-  FIndex: array[0..INDEXSIZE-1] of integer;
+  FIndex: array[0..INDEXSIZE - 1] of integer;
   Data: string;
 begin
   Calls.Clear;
 
-  FileName := ExtractFilePath(ParamStr(0)) + 'Master.dta';
+  // look in 3 places for supercheck partial file:
+  // in user's .local/share/morserunner-server
+  // in /usr/local/share/morserunner-server
+  // in same directory as executable
+  FileName := GetUserDir + '.local/share/morserunner-server/Master.dta';
   if not FileExists(FileName) then
      begin
-	GetDir(0, FileName);
-	FileName := Filename + '/Master.dta';
+	FileName := '/usr/local/share/morserunner-server/Master.dta';
 	if not FileExists(FileName) then
-	   begin
-	      Writeln('Unable to load call file, default single call used');
-	      Exit;
-	   end;
-     end;
+	begin
+	   GetDir(0, FileName);
+	   FileName := Filename + '/Master.dta';
+	   if not FileExists(FileName) then
+	begin
+	   Writeln('Unable to load call file, default single call used');
+	   Exit;
+	end;
+    end;
+  end;
 
   Writeln('Using calls from file: ', Filename);
   with TFileStream.Create(FileName, fmOpenRead) do
@@ -67,8 +75,8 @@ begin
       if FFileSize < INDEXBYTES then Exit;
       ReadBuffer(FIndex, INDEXBYTES);
 
-      if (FIndex[0] <> INDEXBYTES) or (FIndex[INDEXSIZE-1] <> FFileSize)
-        then Exit;
+      if (FIndex[0] <> INDEXBYTES) or (FIndex[INDEXSIZE - 1] <> FFileSize) then
+        Exit;
       SetLength(Data, Size - Position);
       ReadBuffer(Data[1], Length(Data));
     finally
@@ -80,21 +88,20 @@ begin
   try
     //list pointers to calls
     L.Capacity := 20000;
-      P := @Data[1];
+    P := @Data[1];
     Pe := P + Length(Data);
     while P < Pe do
-      begin
+    begin
       L.Add(TObject(P));
       P := P + StrLen(P) + 1;
-      end;
+    end;
     //delete dupes
     L.Sort(CompareCalls);
-    for i:=L.Count-1 downto 1 do
-      if StrComp(PChar(L[i]), PChar(L[i-1])) = 0
-        then L[i] := nil;
+    for i := L.Count - 1 downto 1 do
+      if StrComp(PChar(L[i]), PChar(L[i - 1])) = 0 then L[i] := nil;
     //put calls to Lst
     Calls.Capacity := L.Count;
-    for i:=0 to L.Count-1 do
+    for i := 0 to L.Count - 1 do
       if L[i] <> nil then Calls.Add(PChar(L[i]));
   finally
     L.Free;
@@ -106,12 +113,14 @@ function PickCall: string;
 var
   Idx: integer;
 begin
-  if Calls.Count = 0 then begin Result := 'P29SX'; Exit; end;
+  if Calls.Count = 0 then
+  begin
+    Result := 'N4OGW';
+    Exit;
+  end;
 
   Idx := Random(Calls.Count);
   Result := Calls[Idx];
-
-  if Ini.RunMode = rmHst then Calls.Delete(Idx);
 end;
 
 
@@ -122,4 +131,3 @@ finalization
   Calls.Free;
 
 end.
-
