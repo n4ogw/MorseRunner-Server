@@ -6,15 +6,18 @@
 unit Main;
 
 {$MODE Delphi}
-{$UNITPATH VCL/sdl2}
 
 interface
 
 uses
-  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics,
-  Controls, Forms, Dialogs, Buttons, SndCustm, SndOut, Contest, Ini, MorseKey, CallLst,
-  StdCtrls, Station, Menus, ExtCtrls, Log, Math, ComCtrls, Spin, ImgList, Crc32,
-  synaser, custApp, Cabrillo;
+  {$IFDEF Windows}
+  LazFileUtils,
+  {$ENDIF}
+//  LazLogger,  // add to use DebugLn on windows
+  LCLIntf, LCLType, LMessages, SysUtils, Classes, Graphics,
+  Controls, Forms, Dialogs, Buttons, Contest, Ini, MorseKey, CallLst,
+  StdCtrls, Station, Menus, ExtCtrls, Log, Math, ComCtrls, Spin, ImgList,
+  synaser, Cabrillo, StrUtils, Setup, SndOut, SndCustm;
 
 const
   WM_TBDOWN = WM_USER + 1;
@@ -25,15 +28,12 @@ type
 
   TMainForm = class(TForm)
     AlSoundOut1: TAlSoundOut;
-    ComboBox3: TComboBox;
-    Edit1: TEdit;
+    Label4: TLabel;
     OpenDialog1: TOpenDialog;
-    Port: TLabel;
     Label17: TLabel;
     MainMenu1: TMainMenu;
     File1: TMenuItem;
     MenuCabrillo: TMenuItem;
-    Port1: TLabel;
     startButton: TToggleBox;
     TrackBar: TTrackBar;
     N1: TMenuItem;
@@ -130,8 +130,8 @@ type
     N8: TMenuItem;
     Panel11: TPanel;
 
-    procedure ComboBox3Change(Sender: TObject);
-    procedure Edit1Change(Sender: TObject);
+    procedure CheckBox7Change(Sender: TObject);
+    procedure ShowSetup(Sender :  TObject);
     procedure FormCreate(Sender: TObject);
     procedure AlSoundOut1BufAvailable(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -145,6 +145,8 @@ type
     procedure GroupBox1EndDrag(Sender, Target: TObject; X, Y: integer);
     procedure GroupBox1Enter(Sender: TObject);
     procedure GroupBox1Exit(Sender: TObject);
+    procedure GroupBox2Click(Sender: TObject);
+    procedure Label1Click(Sender: TObject);
     procedure PortClick(Sender: TObject);
     procedure ComboBox2Change(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -169,17 +171,20 @@ type
     procedure Settings1Click(Sender: TObject);
     procedure LIDS1Click(Sender: TObject);
     procedure Activity1Click(Sender: TObject);
-    procedure setPort(serialPort :  string);
-    procedure setMode(mode :  TOpMode);
     procedure setCabrillo(fileName : string);
+    procedure serialInit;
+    procedure SetSerialMode(mode :  TSerialMode);
+
   private
     procedure EnableCtl(Ctl: TWinControl; AEnable: boolean);
     procedure IncRit(dF: integer);
     procedure UpdateRitIndicator;
     procedure DecSpeed;
     procedure IncSpeed;
+    procedure otrsp;
     procedure so2rmini();
-    procedure so2rminiInit();
+    procedure winkey;
+
 
   public
     CompetitionMode: boolean;
@@ -190,76 +195,151 @@ type
     procedure SetBw(BwNo: integer);
     procedure ReadCheckboxes;
     procedure checkSerial(sender : TObject) ;
-    procedure so2rminiCW;
+    procedure sendCW;
+{$IFDEF Windows}
+    procedure CustomExceptionHandler(Sender: TObject; E: Exception);
+{$endif}
   end;
 
 var
-        MainForm	: TMainForm;
-	serialBuffer	: array [0..127] of byte;
-	serialOutBuffer	: array [0..127] of byte;
-        serialPtr	: integer;
-        serialOutPtr	: integer;
-	so2rMiniPtr	: integer;
-        so2rMiniOutPtr	: integer;
-	so2rMiniCmd	: byte;
-	so2rMiniStatus	: boolean;
-	cwBuffer	: array [1..2] of string;
-	serialInput	: TBlockSerial;
-	stopSent	: array [1..2] of boolean;
-	radioNrTx	: integer;
-        timer1		: TTimer;
+        MainForm	 : TMainForm;
+	serialBuffer	 : array [0..127] of byte;
+   serialOutBuffer	 : array [0..127] of byte;
+   otrspCmd		 :  string;
+        serialPtr	 : integer;
+        serialOutPtr	 : integer;
+	devicePtr	 : integer;
+        deviceOutPtr	 : integer;
+	so2rMiniCmd	 : byte;
+        winkeyCmd	 : byte;
+   winkeyCmdCnt		 : integer;
+	serialStatus	 : boolean;
+   serialStatusOtrsp	 : boolean;
+	cwBuffer	 : array [1..2] of string;
+	serialInput	 : TBlockSerial;
+	serialInputOtrsp : TBlockSerial;
+        stopSent	 : array [1..2] of boolean;
+	radioNrTx	 : integer;
+        timer1		 : TTimer;
 
 implementation
 
 {$R *.lfm}
 
+{$ifdef Windows}
+procedure TMainForm.CustomExceptionHandler(Sender: TObject; E: Exception);
+begin
+     // override default exception handler, since error messages cause problem
+     // in win32 app with no console
+end;
+
+{$endif}
+
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+{$ifdef Windows}   
+  Application.OnException := CustomExceptionHandler;
+{$endif}   
   radioNrTx := 1;
-
   Randomize;
   Tst[1] := TContest.Create(1);
+{$ifdef Linux}   
+  Tst[1].Filt.SamplesInInput := AlSoundOut1.Samples;
+  Tst[1].Filt2.SamplesInInput := AlSoundOut1.Samples;
+{$endif}   
   Tst[2] := TContest.Create(2);
+{$ifdef Linux}   
+  Tst[2].Filt.SamplesInInput := AlSoundOut1.Samples;
+  Tst[2].Filt2.SamplesInInput := AlSoundOut1.Samples;
+{$endif} 
   OpenDialog1.Title := 'Select Cabrillo file';
   Cab := TCabrillo.Create;
   Cab.SetNExch(2);
-
   LoadCallList;
-
   AlSoundOut1.BufCount := 4;
   AlSoundOut1.SetChannel(0);
-  FromIni;
-
   MakeKeyer;
   Keyer.Rate := DEFAULTRATE;
   Keyer.BufSize := Ini.BufSize;
-
+ 
   if serialInput = Nil then 
      serialInput := TBlockSerial.Create;
   serialInput.LinuxLock := false;
+  if serialInputOtrsp = Nil then 
+     serialInputOtrsp := TBlockSerial.Create;
+  serialInputOtrsp.LinuxLock := false;
   Sleep(100);
-
-  so2rminiInit;
-
+  FromIni;
   timer1 := TTimer.create( Self );
-  timer1.Interval := 10;
+  timer1.Interval := Ini.SerialPollTime;
   timer1.OnTimer := checkSerial;
   timer1.enabled := true;
-
 end;
 
-procedure TMainForm.Edit1Change(Sender: TObject);
+procedure TMainForm.ShowSetup(Sender: TObject);
 begin
-  setPort(Trim(Edit1.Text));
-  if serialInput <> Nil then so2rminiInit;
-end;
+   Setup.serialModeSave := Ini.serialMode;
+   Setup.serialPortWinkeySave := Ini.serialPortWinkey;
+   Setup.serialPortOtrspSave := Ini.serialPortOtrsp;
+   Setup.serialPortSo2rminiSave := Ini.serialPortSo2rmini;
+   Form1.Edit1.Text := Ini.serialPortWinkey;
+   Form1.Edit2.Text := Ini.serialPortOtrsp;
+   Form1.Edit3.Text := Ini.serialPortSo2rmini;
+   Form1.position := poMainFormCenter;
+   SetSerialMode(serialMode);
 
-procedure TMainForm.ComboBox3Change(Sender: TObject);
-begin
-   if ComboBox3.ItemIndex = 0 then
-      setMode(opWPX)
+   Setup.modeSave := Ini.OpMode;
+   if Ini.OpMode = opWpx then
+      begin
+	 Form1.CheckGroup2.Checked[0] := True;
+	 Form1.CheckGroup2.Checked[1] := False;
+      end
       else
-      setMode(opCab);
+      begin
+	 Form1.CheckGroup2.Checked[0] := False;
+	 Form1.CheckGroup2.Checked[1] := True;
+      end;
+   Form1.ShowModal;
+end;
+
+procedure TMainForm.CheckBox7Change(Sender: TObject);
+begin
+
+end;
+
+procedure TMainForm.SetSerialMode(mode :  TSerialMode);
+begin
+   if mode = modeWinkey then
+      begin
+	 Form1.Edit1.Enabled := True;
+	 Form1.Edit2.Enabled := True;
+	 Form1.Edit3.Enabled := False;
+	 Form1.CheckGroup1.Checked[0] := True;
+	 Form1.CheckGroup1.Checked[1] := False;
+	 Form1.uELED3.Color := clSilver;
+	 if serialStatus then
+	    Form1.uELED1.Color := clGreen
+	 else
+	    Form1.uELED1.Color := clRed;
+	 if serialStatusOtrsp then
+	    Form1.uELED2.Color := clGreen
+	 else
+	    Form1.uELED2.Color := clRed;
+      end
+   else
+      begin
+ 	 Form1.Edit1.Enabled := False;
+	 Form1.Edit2.Enabled := False;
+	 Form1.Edit3.Enabled := True;
+	 Form1.CheckGroup1.Checked[0] := False;
+	 Form1.CheckGroup1.Checked[1] := True;
+	 Form1.uELED1.Color := clSilver;
+	 Form1.uELED2.Color := clSilver;
+	 if serialStatus then
+	    Form1.uELED3.Color := clGreen
+	 else
+	    Form1.uELED3.Color := clRed;
+      end;
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
@@ -281,26 +361,6 @@ begin
     except
     end;
   end;
-end;
-
-procedure TMainForm.setPort(serialPort : string);
-begin
-   Edit1.Text := serialPort;
-   Ini.serialPort := serialPort;
-end;
-
-procedure TMainForm.setMode(mode : TOpMode);
-begin
-   if mode = opWPX then
-      begin
-	 Ini.opMode := opWPX;
-	 ComboBox3.ItemIndex := 0;
-       end
-      else
-      begin
-	  Ini.opMode := opCab;
-	  ComboBox3.ItemIndex := 1;
-      end;
 end;
 
 procedure TMainForm.FormKeyPress(Sender: TObject; var Key: char);
@@ -375,7 +435,9 @@ begin
     end
     else
        begin
+	  {$ifdef Linux}
 	  WriteLn('No file selected');
+	  {$endif}
 	  Exit;
        end;
    setCabrillo(Ini.cabFile);
@@ -403,6 +465,16 @@ begin
 end;
 
 procedure TMainForm.GroupBox1Exit(Sender: TObject);
+begin
+
+end;
+
+procedure TMainForm.GroupBox2Click(Sender: TObject);
+begin
+
+end;
+
+procedure TMainForm.Label1Click(Sender: TObject);
 begin
 
 end;
@@ -521,7 +593,7 @@ const
    'Portions Copyright (c) 2004-2006 Alex Shovkoplyas, VE3NEA'#13#13 +
    'Portions Copyright (c) 2022 Zach Metzinger, N0ZGO'#13;
 begin
-  Application.MessageBox(Msg, 'Morse Runner Server 1.00', MB_OK or MB_ICONINFORMATION);
+  Application.MessageBox(Msg, 'Morse Runner Server 1.1', MB_OK or MB_ICONINFORMATION);
 end;
 
 
@@ -529,8 +601,13 @@ procedure TMainForm.Readme1Click(Sender: TObject);
 var
   FileName: string;
 begin
+   {$IFDEF Linux}
    FileName := '/usr/local/share/morserunner-server/Readme.txt';
-   OpenDocument(PChar(FileName)); 
+   {$Endif}
+   {$IFDEF Windows}
+   FileName := AppendPathDelim(ExtractFileDir(Application.ExeName))+'Readme.txt';
+   {$Endif}
+   OpenDocument(PChar(FileName));
 end;
 
 procedure TMainForm.EnableCtl(Ctl: TWinControl; AEnable: boolean);
@@ -545,8 +622,8 @@ end;
 
 procedure TMainForm.Run(Value: TRunMode);
 var
-  BCompet, BStop : boolean;
-   i		 :  integer;
+   BStop : boolean;
+   i     :  integer;
 begin
   if Value = RunMode then Exit;
 
@@ -622,11 +699,6 @@ begin
 
 end;
 
-
-//------------------------------------------------------------------------------
-//                              accessibility
-//------------------------------------------------------------------------------
-
 procedure TMainForm.SetQsk(Value: boolean);
 begin
   Qsk := Value;
@@ -699,114 +771,225 @@ begin
   ReadCheckboxes;
 end;
 
-
-
 procedure TMainForm.Activity1Click(Sender: TObject);
 begin
   Ini.Activity := (Sender as TMenuItem).Tag;
   SpinEdit3.Value := Ini.Activity;
 end;
 
-procedure TMainForm.so2rminiInit();
+// initialize serial devices. Two modes
+// 1. winkey and otrsp (2 ports)
+// 2. sor2mini (1 port)
+procedure TMainForm.serialInit;
 begin
   if serialInput.InstanceActive = True then
       serialInput.closeSocket;
+  if serialInputOtrsp.InstanceActive = True then
+      serialInputOtrsp.closeSocket;
    
-  serialInput.LinuxLock := False;
-  serialInput.Connect(Ini.serialPort);
-  serialInput.config(19200, 8, 'N', SB1, False, False);
-  if serialInput.lastError <> 0 then
-  begin
-    WriteLn('error opening ', serialPort);
-    WriteLn(serialInput.GetErrorDesc(serialInput.LastError));
-    so2rMiniStatus := False;
-  end     
-  else
-  begin
-    WriteLn('connected to ', Ini.serialPort);
-    so2rMiniStatus := True;
-    serialInput.LinuxLock := False;
-  end;
+   serialStatus := False;
+   serialStatusOtrsp := False;
+   
+  if Ini.serialMode = modeSo2rmini then
+     begin
+	// So2rMini
+	serialInput.LinuxLock := False;
+        {$ifdef Linux}
+	writeln('so2rmini connect to ',serialPortSo2rmini);
+        {$endif}
+	try
+           serialInput.Connect(Ini.serialPortSo2rmini);
+        except
+              On E :Exception do begin
+                 serialStatus := False;
+                 ShowMessage(E.Message);
+              end;
+        end;
+	if serialInput.lastError = 0 then
+	begin
+           serialInput.config(19200, 8, 'N', SB1, False, False);
+           {$ifdef Linux}
+	   WriteLn('so2rmini connected to ', Ini.serialPortSo2rmini);
+           {$endif}
+	   serialStatus := True;
+	   serialInput.LinuxLock := False;
+	end
+        else
+	begin
+	   serialStatus := False;
+	end;
+     end
+   else
+     begin
+	// winkey
+	serialInput.LinuxLock := False;
+        try
+           serialInput.Connect(Ini.serialPortWinkey);
+        except
+              On E :Exception do begin
+                 serialStatus := False;
+		 ShowMessage(E.Message);
+              end;
+        end;
+        if serialInput.lastError = 0 then
+	begin
+           serialInput.config(1200, 8, 'N', SB1, False, False);
+           {$ifdef Linux}
+           Writeln('winkey connected to ', Ini.serialPortWinkey);
+           {$endif}
+	   serialStatus := True;
+	   serialInput.LinuxLock := False;
+	end
+        else
+	begin
+	   serialStatus := False;
+	end;
+	// otrsp
+	serialInputOtrsp.LinuxLock := False;
+        try
+           serialInputOtrsp.Connect(Ini.serialPortOtrsp);
+        except
+              On E :Exception do begin
+                 serialStatusOtrsp := False;
+                 ShowMessage(E.Message);
+              end;
+        end;
+        if serialInputOtrsp.lastError = 0 then
+	begin
+           serialInputOtrsp.config(9600, 8, 'N', SB1, False, False);
+           {$ifdef Linux}
+           Writeln('otrsp connected to ', Ini.serialPortOtrsp);
+           {$endif}
+	   serialStatusOtrsp := True;
+	   serialInputOtrsp.LinuxLock := False;
+	end
+        else
+	begin
+	   serialStatusOtrsp := False;
+	end;
+     end;
 
   serialPtr := 0;
   serialOutPtr := 0;
-  so2rMiniPtr := 0;
-  so2rMiniOutPtr := 0;
+  devicePtr := 0;
+  deviceOutPtr := 0;
   cwBuffer[1] := '';
   cwBuffer[2] := '';
   so2rMiniCmd := 0;
+  winkeyCmd := 0;
+  winkeyCmdCnt := 0;
   stopSent[1] := True;
   stopSent[2] := True;
+  otrspCmd := '';
 end;
 
-// check for characters on serial port
-procedure TMainForm.checkSerial(sender : TObject) ; 
+// 1. check for characters on received on device serial port (winkey or so2rmini)
+// 2. check for characters to transmit on device serial port
+// 3. process commands
+procedure TMainForm.checkSerial(sender : TObject) ;
+var
+   b :  byte;
 begin
-  if so2rMiniStatus = false then
-     exit;
-   
+  // read from winkey or so2rmini serial port into circular buffer
   while serialInput.CanReadEx(0) = True do
   begin
     serialBuffer[serialPtr] := serialInput.RecvByte(0);
+    //debugln(char(serialBuffer[serialPtr]),' ',serialBuffer[serialPtr].toHexString);
     serialPtr := serialPtr + 1;
     serialPtr := serialPtr mod 128;
   end;
-   
-  while ( (so2rminiOutPtr <> serialOutPtr) and (serialInput.CanWrite(0) = true) ) do
+
+  // append chars to otrsp command until return is received
+  while serialInputOtrsp.CanReadEx(0) = True do
   begin
-      serialInput.SendByte(serialOutBuffer[so2rminiOutPtr]);
-      so2rminiOutPtr := so2rminiOutPtr + 1;
-      so2rminiOutPtr := so2rminiOutPtr mod 128;
-  end;   
-  so2rmini;
+    b :=  serialInputOtrsp.RecvByte(0);
+    if b <> $0d then
+       otrspCmd := otrspCmd + char(b)
+    else
+       otrsp;
+  end;
+
+  // send winkey or so2rmini output 
+  while ( (serialOutPtr <> deviceOutPtr) and (serialInput.CanWrite(0) = true) ) do
+  begin
+      serialInput.SendByte(serialOutBuffer[deviceOutPtr]);
+      deviceOutPtr := deviceOutPtr + 1;
+      deviceOutPtr := deviceOutPtr mod 128;
+  end;
+   
+  if Ini.serialMode = modeSo2rmini then
+       so2rmini
+     else
+       winkey;
+
   if runMode = rmRun then
-      so2rminiCW;
+      sendCW;
 end;
 
 // send cw messages
-procedure TMainForm.so2rminiCW; 
+procedure TMainForm.sendCW; 
 var
-   i		    : integer;
+  i,l		    : integer;
   i0, i1, i2, cmdNr : integer;
-  firstPart	    : string;
+  firstPart, work   : string;
+  const cmdSep : char = '+'; // character to mark commands
+  const cmdEnd : char = '='; // character to mark message as complete
 begin
    for i:=1 to 2 do
       begin
-	 if Length(cwBuffer[i]) = 0 then
+         l := Length(cwBuffer[i]);
+
+	 if l = 0 then
 	    Continue;
+
+         // buffer overrun, kill it
+         if l > 32 then
+         begin
+           cwBuffer[i] := '';
+           Continue;
+         end;
+
+         // check to make sure message is complete (ends with =)
+         if pos('=',cwBuffer[i]) = 0 then
+            Continue;
+
+         // copy part up to = into work
+         i1 := Pos(cmdEnd, cwBuffer[i]);
+         work := Copy(cwBuffer[i],1,i1-1);
+         Delete(cwBuffer[i],1,i1);
 
 	 cmdNr := 0;
 	 i0 := 1;
 	 i2 := 0;
 	 while true do
 	 begin
-	    // find any complete -xx- commands and remove them 
-	    i1 := Pos('-', cwBuffer[i], i0);
-	    i2 := Pos('-', cwBuffer[i], i1 + 1);
+	    // find any complete +xx+ commands and remove them
+	    i1 := Pos(cmdSep, work, i0);
+	    i2 := Pos(cmdSep, work, i1 + 1);
 	    if ((i1 <> 0) and (i2 <> 0) and ((i2 - i1) = 3)) then
 	    begin
-	       cmdNr := (byte(cwBuffer[i][i1 + 2]) - 48) + (byte(cwBuffer[i][i1 + 1]) - 48) * 10;
+	       cmdNr := (byte(work[i1 + 2]) - 48) + (byte(work[i1 + 1]) - 48) * 10;
 	       // save text before, needed to ID callsign
-	       firstPart := Copy(cwBuffer[i],1,i1-1);
-	       delete(cwBuffer[i],i1,4);
+	       firstPart := Trim(Copy(work,1,i1-1));
+               delete(work,i1,4);
 	       // act on cmdNr
 	       case cmdNr of
 		 0: Tst[i].Me.Msg := [msgNone];
 		 1:
 		   begin
 		      Tst[i].Me.Msg := [msgCQ];
-		      NRSent[i] := False;
+                      NRSent[i] := False;
 		      CallSent[i] := False;
 		   end;
 		 2:
 		   begin
 		      Include(Tst[i].Me.Msg, msgNR);
-		      NrSent[i] := True;
+                      NrSent[i] := True;
 		   end;
 		 3: 
 		    begin
 		       Tst[i].Me.Msg := [msgCQ, msgTU];
-		    end;
+                    end;
 		 4: Tst[i].Me.Msg := [msgMyCall];
 		 5:
 		   begin
@@ -815,7 +998,7 @@ begin
 		      Include(Tst[i].Me.Msg, msgHisCall);
 		      CallSent[i] := True;
 		      Tst[i].Me.HisCall := firstPart;
-		   end;
+                   end;
 		 6: Tst[i].Me.Msg := [msgB4];
 		 7: Tst[i].Me.Msg := [msgQm];
 		 8: Tst[i].Me.Msg := [msgNil];
@@ -844,19 +1027,19 @@ begin
 	    end
 	    else
 	    begin
-	       // found all -xx- in this text, can send the rest 
+	       // found all +xx+ in this text, can send the rest
 	       break;
 	    end;
 	 end;
-	 if so2rMiniStatus = True then
+	 if serialStatus = True then
 	 begin
 	    serialOutBuffer[serialOutPtr] := i;
 	    serialOutPtr := serialOutPtr + 1;
 	    serialOutPtr := serialOutPtr mod 128;
 	    stopSent[i] := False;
 	 end;
-	 Tst[i].Me.SendText(cwBuffer[i]);
-	 cwBuffer[i] := '';
+	 Tst[i].Me.SendText(work);
+	 work := '';
       end;
 end;
 
@@ -865,7 +1048,6 @@ procedure TMainForm.so2rmini;
 var
   i	    :  integer;
   b,b2	    : byte;
-  cmd	    : byte;
   const ver : Pchar = 'TRCW V4';
 begin
   // check if cw stopped sending and send so2rmini byte
@@ -886,11 +1068,11 @@ begin
      stopSent[2] := True;
   end;
 
-  while so2rMiniPtr <> serialPtr do
+  while devicePtr <> serialPtr do
   begin
-    b := serialBuffer[so2rMiniPtr];
-    so2rMiniPtr := so2rMiniPtr + 1;
-    so2rMiniPtr := so2rMiniPtr mod 128;
+    b := serialBuffer[devicePtr];
+    devicePtr := devicePtr + 1;
+    devicePtr := devicePtr mod 128;
 
     // already a command, byte b is argument of command
     if so2rMiniCmd <> 0 then
@@ -913,16 +1095,17 @@ begin
 	end;
         $03:
         begin
-          // set CW pitch : gives some problems
-	  //if ( (b>= 30) and (b <= 90)) then
+          // set CW pitch : some issues, so disabled for now
+	  // if ( (b>= 30) and (b <= 90)) then
 	  //   SetPitch(b * 10);
         end;
 	$04:; //WriteLn('Paddle tone byte');
 	$05:; //WriteLn('Paddle pin byte');
 	$06:; //WriteLn('Keyer weight byte');
 	$07:; //WriteLn('CW char offset byte');
-	$08:  //WriteLn('CW speed byte');
+	$08:  
         begin
+	   //  WriteLn('CW speed byte'); 
 	  if ( (b >= 10) and (b <= 60) ) then
 	     begin
 		SpinEdit1.Value := b;
@@ -934,7 +1117,7 @@ begin
 	$0A:; //WriteLn('PTT on byte');
         $0B: 
 	begin
-	   //WriteLn('Radio select byte');
+	   //  WriteLn('Radio select byte');
 	   if b = $01 then
 	      radioNrTx := 1
 	   else
@@ -1013,5 +1196,257 @@ begin
     end;
   end;
 end;
+
+// process otrsp commands
+procedure TMainForm.otrsp;
+begin
+   otrspCmd := UpperCase(otrspCmd);
+   if LeftStr(otrspCmd,1) = '?' then
+      // OTRSP query - not implemented yet
+   else if LeftStr(otrspCmd,2) = 'RX' then
+      begin
+	 if Length(otrspCmd) = 3 then
+	    if RightStr(otrspCmd,1) = '1' then
+	       begin
+		  AlSoundOut1.SetChannel(0);
+	       end  
+	    else if RightStr(otrspCmd,1) = '2' then
+	       begin
+		  AlSoundOut1.SetChannel(1);
+	       end;
+	 if Length(otrspCmd) = 4 then
+	    if ((RightStr(otrspCmd,2)='1S') or (RightStr(otrspCmd,2)='2S')
+		  or (RightStr(otrspCmd,2)='1R') or (RightStr(otrspCmd,2)='2R')) then
+	       begin
+		  AlSoundOut1.SetChannel(2);
+	       end;
+      end
+   else if LeftStr(otrspCmd,2) = 'TX' then
+      begin
+	 if RightStr(otrspCmd,1)='1' then
+	    radioNrTx := 1
+         else  if RightStr(otrspCmd,1)='2' then
+            radioNrTx := 2;
+      end;
+   otrspCmd := '';
+end;
+
+// process winkey commands
+procedure TMainForm.winkey;
+var
+  b	  : byte;
+  haveCmd : boolean;
+   echo	  : boolean;
+   pointerExtra : boolean;
+   const ver : byte=23;   // winkey version reported
+begin
+  haveCmd := False;
+  echo := False;
+  pointerExtra := False;
+   
+  // check if cw stopped sending and send status byte
+  if ((stopSent[1] = False) and ((Tst[1].Me.State = stListening) or
+    (Tst[1].Me.State = stCopying))) then
+  begin
+    // 0b11000000 = 0xc0
+    serialOutBuffer[serialOutPtr] := $C0;
+    serialOutPtr := serialOutPtr + 1;
+    serialOutPtr := serialOutPtr mod 128;
+    stopSent[1] := True;
+  end;
+  if ((stopSent[2] = False) and ((Tst[2].Me.State = stListening) or
+     (Tst[2].Me.State = stCopying))) then
+  begin
+     serialOutBuffer[serialOutPtr] := $C0;
+     serialOutPtr := serialOutPtr + 1;
+     serialOutPtr := serialOutPtr mod 128;
+     stopSent[2] := True;
+  end;
+
+  while devicePtr <> serialPtr do
+  begin
+    b := serialBuffer[devicePtr];
+    devicePtr := devicePtr + 1;
+    devicePtr := devicePtr mod 128;
+
+    if echo then
+    begin
+       serialOutBuffer[serialOutPtr] := b;
+       serialOutPtr := serialOutPtr + 1;
+       serialOutPtr := serialOutPtr mod 128;
+       echo := False;
+       continue;
+    end;
+     
+    // already a command, byte b is argument of command
+    if haveCmd then
+    begin
+      case winkeyCmd of
+	$00 : // admin command
+        begin
+	   if (b = $02) then
+	   begin
+	      // send winkey version
+	      serialOutBuffer[serialOutPtr] := ver;
+	      serialOutPtr := serialOutPtr + 1;
+	      serialOutPtr := serialOutPtr mod 128;
+	   end
+	   else if (b = $04) then
+	      begin
+		 echo := true;
+	      end;
+	end;
+	$01:;  // sidetone control
+	$02:  // set speed
+        begin
+	  if ( (b >= 10) and (b <= 60) ) then
+	     begin
+		SpinEdit1.Value := b;
+		Tst[1].Me.Wpm := b;
+		Tst[2].Me.Wpm := b;
+	     end;
+        end;
+	$04 : // PTT lead/tail
+	begin
+
+	end; 
+	$06:; // pause
+	$07:; // get speed pot
+	$09:; // set pin config
+	$0B:; // key immediate
+	$0C:; // set HSCW
+	$0D:; // set Farnsworth
+	$0E:; // set winkey2 mode
+	$0F:; // load defaults
+	$10:; // set 1st extension
+	$11:; // set key comp
+	$12:; // set paddle switchpoint
+	$13:; // null
+	$14:; // software paddle
+	$16:
+        begin
+             // winkey pointer command. No docs available on these,
+             // will ignore them for now
+             // b=01, 02, 03 have a following 1-byte argument
+             if pointerExtra then
+                begin
+                  // extra arg would be handled here
+                  pointerExtra := False;
+                  haveCmd := False;
+                  winkeyCmdCnt :=0;
+                  winkeyCmd := 0;
+                  Continue;
+                end;
+             if ((b <> 0) and not(pointerExtra)) then
+                begin
+                     pointerExtra := True;
+                     Continue;
+                end;
+        end;
+	$17:; // dit/dah ratio
+	$18:; // buffered PTT on/off
+	$19:; // buffered key
+	$1A:; // wait
+	$1B:; // merge letters
+	$1C:; // buffered speed change
+        $1D:; // HSCW speed change
+	$1E:; // cancel buffered speed change
+	$1F:; // buffered nop
+      end;
+
+      // read extra command arguments
+      if winkeyCmdCnt = 0 then
+	 begin
+	    haveCmd := False;
+	    winkeyCmd := 0;
+	    b := 0;
+            pointerExtra := false;
+	 end
+      else
+	 begin
+	    winkeyCmdCnt := winkeyCmdCnt - 1;
+	 end;
+
+      continue;
+    end;
+
+    // cw characters: add to send buffer if on this radio
+    if ( (RunMode = rmRun) and (b >= 32)) then 
+    begin
+      cwBuffer[radioNrTx] := cwBuffer[radioNrTx] + chr(b);
+      continue;
+    end;
+
+    case b of
+      $08 : // backspace
+      begin
+	 haveCmd := False;
+  	 winkeyCmdCnt := 0;
+      end;
+      $0A : // clear input buffer
+      begin
+	 haveCmd := False;
+	 winkeyCmdCnt := 0;
+         cwBuffer[radioNrTx] := '';
+         Continue;
+      end;
+      $13 : // null command
+      begin
+	 haveCmd := False;
+ 	 winkeyCmdCnt := 0;
+      end;
+      // these commands have arguments; set cmd to this byte, next byte
+      // will be interpreted as argument
+      // commands with multi-byte arguments not supported!
+      $00, // admin command
+      $01, // sidetone control
+      $02, // WPM speed
+      $03, // weighting
+      $06, // set pause
+      $07, // get speed pot
+      $09, // pin config
+      $0B, // key immediate
+      $0C, // HSCW
+      $0D, // Farnsworth
+      $0E, // Winkey2 mode
+      $0F, // load defaults
+      $10, // set extension
+      $11, // key compensation
+      $12, // paddle switchpoint
+      $14, // software paddle
+      $15, // req status
+      $16, // pointer command
+      $17, // dit/dah ratio
+      $18, // ptt on/off
+      $19, // key buffered
+      $1A, // wait
+      $1B, // merge letters
+      $1C, // buffered speed change
+      $1D, // HSCW speed
+      $1E, // cancel buffered speed change
+      $1F : // buffered nop
+      begin
+         winkeyCmdCnt := 0;
+         winkeyCmd := b;
+	 haveCmd := True;
+      end;
+      $04 : // PTT lead/tail (not implemented)
+            // takes two bytes as arguments
+      begin
+	 winkeyCmdCnt := 1;
+         winkeyCmd := b;
+	 haveCmd := True;
+      end;
+      $05 : // setup speed pot (not implemented)
+            // takes three bytes as arguments
+      begin
+	 winkeyCmdCnt := 2;
+         winkeyCmd := b;
+	 haveCmd := True;
+      end;
+    end;
+  end;
+end;
+
 
 end.

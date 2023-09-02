@@ -10,7 +10,10 @@ unit CallLst;
 interface
 
 uses
-  SysUtils, Classes, Ini;
+  {$IFDEF Windows}
+  LazFileUtils,Forms,
+  {$ENDIF}
+  SysUtils, Classes;
 
 procedure LoadCallList;
 function PickCall: string;
@@ -48,10 +51,13 @@ var
 begin
   Calls.Clear;
 
+  // Linux: 
   // look in 3 places for supercheck partial file:
   // in user's .local/share/morserunner-server
   // in /usr/local/share/morserunner-server
   // in same directory as executable
+
+  {$IFDEF Linux} 
   FileName := GetUserDir + '.local/share/morserunner-server/Master.dta';
   if not FileExists(FileName) then
      begin
@@ -61,14 +67,28 @@ begin
 	   GetDir(0, FileName);
 	   FileName := Filename + '/Master.dta';
 	   if not FileExists(FileName) then
-	begin
-	   Writeln('Unable to load call file, default single call used');
-	   Exit;
-	end;
+	   begin
+	      Writeln('Unable to load call file, default single call used');
+	      Exit;
+	   end;
     end;
   end;
+  {$ENDIF}
+  // Windows: 
+  // in same directory as executable
 
+  {$IFDEF Windows}
+  FileName := AppendPathDelim(ExtractFileDir(Application.ExeName))+'Master.dta';
+  if not FileExists(FileName) then
+  begin
+     // Writeln('Unable to load call file, default single call used');
+     Exit;
+  end;
+  {$ENDIF}   
+
+  {$IFDEF Linux} 
   Writeln('Using calls from file: ', Filename);
+  {$ENDIF}
   with TFileStream.Create(FileName, fmOpenRead) do
     try
       FFileSize := Size;

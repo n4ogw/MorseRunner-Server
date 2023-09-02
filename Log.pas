@@ -10,7 +10,7 @@ unit Log;
 interface
 
 uses
-  LCLIntf, LCLType, SysUtils, Classes, Graphics, RndFunc, Math;
+  LCLIntf, LCLType, SysUtils, Classes, Graphics;
 
 procedure Clear;
 
@@ -34,7 +34,7 @@ var
 implementation
 
 uses
-  Contest, Main, DxStn, DxOper, Ini, MorseKey;
+  Contest, Main;
 
 procedure Clear;
 begin

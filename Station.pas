@@ -10,7 +10,7 @@ unit Station;
 interface
 
 uses
-  SysUtils, Classes, Math, SndTypes, Ini, MorseKey, Cabrillo;
+  SysUtils, Classes, SndTypes, Ini, MorseKey;
 
 const
   NEVER = MAXINT;

@@ -74,7 +74,7 @@ begin
 
   FPasses := 3;
   FPoints := 129;
-  FSamplesInInput := 512;
+  FSamplesInInput := 1024;
   FDecimateFactor := 1;
   FGainDb := 0;
   Reset;

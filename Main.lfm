@@ -1,17 +1,18 @@
 object MainForm: TMainForm
-  Left = 1379
-  Height = 237
-  Top = 199
-  Width = 414
+  Left = 1183
+  Height = 310
+  Top = 790
+  Width = 645
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
-  Caption = 'Morse Runner Server 1.00'
-  ClientHeight = 212
-  ClientWidth = 414
+  Caption = 'Morse Runner Server 1.1'
+  ClientHeight = 280
+  ClientWidth = 645
   Color = clBtnFace
+  DesignTimePPI = 144
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'MS Sans Serif'
+  Font.Height = -17
+  Font.Name = 'Microsoft Sans Serif'
   KeyPreview = True
   Menu = MainMenu1
   OnClose = FormClose
@@ -21,46 +22,50 @@ object MainForm: TMainForm
   OnKeyPress = FormKeyPress
   OnKeyUp = FormKeyUp
   Position = poDesktopCenter
-  LCLVersion = '2.2.4.0'
+  LCLVersion = '2.2.6.0'
   object Bevel1: TBevel
     Left = 0
-    Height = 2
+    Height = 3
     Top = 0
-    Width = 414
+    Width = 645
     Align = alTop
   end
   object Panel9: TPanel
-    Left = -310
-    Height = 210
-    Top = 2
-    Width = 724
+    Left = -441
+    Height = 277
+    Top = 3
+    Width = 1086
     Align = alRight
     BevelOuter = bvNone
-    ClientHeight = 210
-    ClientWidth = 724
+    ClientHeight = 277
+    ClientWidth = 1086
     TabOrder = 0
     object GroupBox3: TGroupBox
-      Left = 522
-      Height = 96
-      Top = 8
-      Width = 194
+      Left = 756
+      Height = 144
+      Top = 6
+      Width = 318
       Caption = ' Band Conditions '
-      ClientHeight = 73
-      ClientWidth = 188
+      ClientHeight = 119
+      ClientWidth = 314
+      Font.Color = clWindowText
+      Font.Height = -17
+      Font.Name = 'Microsoft Sans Serif'
+      ParentFont = False
       TabOrder = 0
       object Label11: TLabel
-        Left = 142
-        Height = 14
-        Top = 2
-        Width = 42
+        Left = 213
+        Height = 20
+        Top = 3
+        Width = 54
         Caption = 'Activity'
         ParentColor = False
       end
       object CheckBox2: TCheckBox
-        Left = 10
-        Height = 20
-        Top = 44
-        Width = 50
+        Left = 15
+        Height = 29
+        Top = 66
+        Width = 66
         Caption = 'QSB'
         Checked = True
         OnClick = CheckBoxClick
@@ -69,10 +74,10 @@ object MainForm: TMainForm
         TabStop = False
       end
       object CheckBox3: TCheckBox
-        Left = 10
-        Height = 20
-        Top = 24
-        Width = 50
+        Left = 15
+        Height = 29
+        Top = 36
+        Width = 69
         Caption = 'QRM'
         Checked = True
         OnClick = CheckBoxClick
@@ -81,10 +86,10 @@ object MainForm: TMainForm
         TabStop = False
       end
       object CheckBox4: TCheckBox
-        Left = 10
-        Height = 20
-        Top = 4
-        Width = 49
+        Left = 15
+        Height = 29
+        Top = 6
+        Width = 67
         Caption = 'QRN'
         Checked = True
         OnClick = CheckBoxClick
@@ -93,10 +98,10 @@ object MainForm: TMainForm
         TabStop = False
       end
       object CheckBox5: TCheckBox
-        Left = 74
-        Height = 20
-        Top = 4
-        Width = 62
+        Left = 111
+        Height = 29
+        Top = 6
+        Width = 78
         Caption = 'Flutter'
         Checked = True
         OnClick = CheckBoxClick
@@ -105,11 +110,11 @@ object MainForm: TMainForm
         TabStop = False
       end
       object CheckBox6: TCheckBox
-        Left = 74
-        Height = 20
-        Top = 26
-        Width = 52
-        Caption = 'LID''s'
+        Left = 111
+        Height = 29
+        Top = 39
+        Width = 66
+        Caption = 'LIDs'
         Checked = True
         OnClick = CheckBoxClick
         State = cbChecked
@@ -117,10 +122,10 @@ object MainForm: TMainForm
         TabStop = False
       end
       object SpinEdit3: TSpinEdit
-        Left = 142
-        Height = 23
-        Top = 18
-        Width = 40
+        Left = 213
+        Height = 28
+        Top = 27
+        Width = 60
         MaxValue = 9
         MinValue = 1
         OnChange = SpinEdit3Change
@@ -130,13 +135,17 @@ object MainForm: TMainForm
       end
     end
     object GroupBox1: TGroupBox
-      Left = 322
-      Height = 172
+      Left = 456
+      Height = 258
       Top = 8
-      Width = 194
+      Width = 291
       Caption = 'Station'
-      ClientHeight = 149
-      ClientWidth = 188
+      ClientHeight = 233
+      ClientWidth = 287
+      Font.Color = clWindowText
+      Font.Height = -17
+      Font.Name = 'Microsoft Sans Serif'
+      ParentFont = False
       TabOrder = 1
       OnChangeBounds = GroupBox1ChangeBounds
       OnClick = GroupBox1Click
@@ -145,42 +154,42 @@ object MainForm: TMainForm
       OnEnter = GroupBox1Enter
       OnExit = GroupBox1Exit
       object Label5: TLabel
-        Left = 162
-        Height = 14
-        Top = 32
-        Width = 26
+        Left = 243
+        Height = 20
+        Top = 48
+        Width = 41
         Caption = 'WPM'
         ParentColor = False
       end
       object Label6: TLabel
-        Left = 10
-        Height = 14
-        Top = 34
-        Width = 61
+        Left = 15
+        Height = 20
+        Top = 51
+        Width = 80
         Caption = 'CW Speed'
         ParentColor = False
       end
       object Label7: TLabel
-        Left = 10
-        Height = 14
-        Top = 62
-        Width = 49
+        Left = 15
+        Height = 20
+        Top = 93
+        Width = 71
         Caption = 'CW Pitch'
         ParentColor = False
       end
       object Label9: TLabel
-        Left = 10
-        Height = 14
-        Top = 90
-        Width = 78
+        Left = 15
+        Height = 20
+        Top = 135
+        Width = 106
         Caption = 'RX Bandwidth'
         ParentColor = False
       end
       object SpinEdit1: TSpinEdit
-        Left = 91
-        Height = 23
-        Top = 32
-        Width = 70
+        Left = 136
+        Height = 28
+        Top = 48
+        Width = 105
         MaxValue = 120
         MinValue = 10
         OnChange = SpinEdit1Change
@@ -189,22 +198,22 @@ object MainForm: TMainForm
         Value = 30
       end
       object CheckBox1: TCheckBox
-        Left = 11
-        Height = 20
-        Top = 4
-        Width = 50
+        Left = 16
+        Height = 29
+        Top = 6
+        Width = 65
         Caption = 'QSK'
         OnClick = CheckBox1Click
         TabOrder = 1
         TabStop = False
       end
       object ComboBox1: TComboBox
-        Left = 91
-        Height = 20
-        Top = 58
-        Width = 70
+        Left = 136
+        Height = 28
+        Top = 87
+        Width = 105
         DropDownCount = 12
-        ItemHeight = 14
+        ItemHeight = 20
         Items.Strings = (
           '300Hz'
           '350Hz'
@@ -226,12 +235,12 @@ object MainForm: TMainForm
         TabStop = False
       end
       object ComboBox2: TComboBox
-        Left = 91
-        Height = 20
-        Top = 88
-        Width = 70
+        Left = 136
+        Height = 28
+        Top = 132
+        Width = 105
         DropDownCount = 12
-        ItemHeight = 14
+        ItemHeight = 20
         Items.Strings = (
           '100Hz'
           '150Hz'
@@ -251,18 +260,18 @@ object MainForm: TMainForm
         TabStop = False
       end
       object Label17: TLabel
-        Left = 11
-        Height = 14
-        Top = 125
-        Width = 66
+        Left = 16
+        Height = 20
+        Top = 188
+        Width = 86
         Caption = 'CW volume'
         ParentColor = False
       end
       object TrackBar: TTrackBar
-        Left = 80
-        Height = 20
-        Top = 108
-        Width = 84
+        Left = 120
+        Height = 52
+        Top = 162
+        Width = 126
         AutoSize = True
         OnChange = TrackBarChange
         Position = 0
@@ -274,73 +283,28 @@ object MainForm: TMainForm
       end
     end
     object startButton: TToggleBox
-      Left = 582
-      Height = 25
-      Top = 175
-      Width = 75
+      Left = 876
+      Height = 38
+      Top = 192
+      Width = 112
       Caption = 'Start'
+      Font.Color = clWindowText
+      Font.Height = -17
+      Font.Name = 'Microsoft Sans Serif'
       OnChange = startButtonChange
+      ParentFont = False
       TabOrder = 2
-    end
-    object Edit1: TEdit
-      Left = 565
-      Height = 22
-      Top = 107
-      Width = 102
-      OnChange = Edit1Change
-      TabOrder = 3
-      Text = '/dev/pts/1'
-    end
-    object Port: TLabel
-      Left = 526
-      Height = 17
-      Top = 110
-      Width = 26
-      Caption = 'Port'
-      Font.Color = clWindowText
-      Font.Height = -13
-      Font.Name = 'MS Sans Serif'
-      ParentColor = False
-      ParentFont = False
-      OnClick = PortClick
-    end
-    object ComboBox3: TComboBox
-      Left = 565
-      Height = 20
-      Top = 141
-      Width = 100
-      ItemHeight = 12
-      OnChange = ComboBox3Change
-      TabOrder = 4
-      Items.Strings = (
-          'WPX'
-          'Cabrillo'
-	  )
-    end
-    object Port1: TLabel
-      Left = 526
-      Height = 17
-      Top = 145
-      Width = 34
-      Caption = 'Mode'
-      Font.Color = clWindowText
-      Font.Height = -13
-      Font.Name = 'MS Sans Serif'
-      ParentColor = False
-      ParentFont = False
-      OnClick = PortClick
     end
   end
   object AlSoundOut1: TAlSoundOut
-    SamplesPerSec = 11025
     BufCount = 8
     OnBufAvailable = AlSoundOut1BufAvailable
-    Left = 384
-    Top = 148
+    Left = 576
+    Top = 222
   end
   object MainMenu1: TMainMenu
-    Left = 522
-    Top = 242
+    Left = 783
+    Top = 363
     object File1: TMenuItem
       Caption = 'File'
       OnClick = File1Click
@@ -356,6 +320,13 @@ object MainForm: TMainForm
     object Settings1: TMenuItem
       Caption = 'Settings'
       OnClick = Settings1Click
+      object Devices1: TMenuItem
+        Caption = 'Setup...'
+        OnClick = ShowSetup
+      end
+      object N8: TMenuItem
+        Caption = '-'
+      end
       object QSK1: TMenuItem
         Caption = 'QSK'
         OnClick = QSK1Click
@@ -661,7 +632,7 @@ object MainForm: TMainForm
     end
   end
   object OpenDialog1: TOpenDialog
-    Left = 8
-    Top = 184
+    Left = 12
+    Top = 276
   end
 end

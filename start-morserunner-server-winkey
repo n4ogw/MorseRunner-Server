@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# for use with winkey and OTRSP. Two separate port pairs are created
+# for the emulated winkey and OTRSP devices.
+#
+
+killall socat
+socat -d -d pty,rawer,echo=0,link=/tmp/pty1 pty,rawer,echo=0,link=/tmp/pty1a &
+sleep 1
+if [ -e '/tmp/pty1' ];
+then
+   echo 'Created /tmp/pty1'
+fi
+if [ -e '/tmp/pty1a' ];
+then
+   echo 'Created /tmp/pty1a'
+fi
+
+socat -d -d pty,rawer,echo=0,link=/tmp/pty2 pty,rawer,echo=0,link=/tmp/pty2a &
+sleep 1
+if [ -e '/tmp/pty2' ];
+then
+   echo 'Created /tmp/pty2'
+fi
+if [ -e '/tmp/pty2a' ];
+then
+   echo 'Created /tmp/pty2a'
+fi
+
+MorseRunner-Server
+killall socat
+
+
+

@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# for use with the so2rMini (N6TR firmware). One device handles both
+# CW and audio switching
+#
+
+killall socat
+socat -d -d pty,rawer,echo=0,link=/tmp/pty1 pty,rawer,echo=0,link=/tmp/pty2 &
+sleep 1
+if [ -e '/tmp/pty1' ];
+then
+   echo 'Created /tmp/pty1'
+fi
+if [ -e '/tmp/pty2' ];
+then
+   echo 'Created /tmp/pty2'
+fi
+MorseRunner-Server
+killall socat
+
+
+

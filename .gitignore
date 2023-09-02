@@ -3,3 +3,6 @@ lib
 *.o
 sdl_example/example
 *.core
+AutomaticConversion.log
+ConverterBackup
+start-test

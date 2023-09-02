@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="5">
+    <Name Value="talsoundout"/>
+    <Type Value="RunAndDesignTime"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <SearchPaths>
+        <IncludeFiles Value="sdl2"/>
+        <OtherUnitFiles Value="sdl2"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+    </CompilerOptions>
+    <Files>
+      <Item>
+        <Filename Value="SndCustm.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="SndCustm"/>
+      </Item>
+      <Item>
+        <Filename Value="SndOut.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="SndOut"/>
+      </Item>
+      <Item>
+        <Filename Value="SndTypes.pas"/>
+        <UnitName Value="SndTypes"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/ctypes.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/jedi.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdl.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdl2.pas"/>
+        <UnitName Value="sdl2"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdl2_gfx.pas"/>
+        <UnitName Value="sdl2_gfx"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdl2_image.pas"/>
+        <UnitName Value="sdl2_image"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdl2_mixer.pas"/>
+        <UnitName Value="sdl2_mixer"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdl2_net.pas"/>
+        <UnitName Value="sdl2_net"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdl2_ttf.pas"/>
+        <UnitName Value="sdl2_ttf"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlatomic.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlaudio.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlblendmode.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlclipboard.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlcpuinfo.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlerror.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlerror_c.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlevents.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlfilesystem.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlgamecontroller.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlgesture.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlguid.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlhaptic.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlhidapi.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlhints.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdljoystick.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlkeyboard.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlkeycode.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlloadso.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdllocale.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdllog.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlmessagebox.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlmisc.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlmouse.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlmutex.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlpixels.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlplatform.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlpower.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlrect.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlrenderer.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlrwops.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlscancode.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlsensor.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlshape.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlstdinc.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlsurface.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlsystem.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlsyswm.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlthread.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdltimer.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdltouch.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdltypes.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlversion.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="sdl2/sdlvideo.inc"/>
+        <Type Value="Include"/>
+      </Item>
+      <Item>
+        <Filename Value="BaseComp.pas"/>
+        <UnitName Value="BaseComp"/>
+      </Item>
+    </Files>
+    <RequiredPkgs>
+      <Item>
+        <PackageName Value="LCLBase"/>
+      </Item>
+      <Item>
+        <PackageName Value="FCL"/>
+      </Item>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>

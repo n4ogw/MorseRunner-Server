@@ -76,7 +76,7 @@ var
    fields : TStringArray;
    i,j	  : integer;
    L	  : TList;
-   P1,P2  : ^TCabData;
+   P1     : ^TCabData;
    rec	  : ^TCabData;
 begin
    nCab := 0;
@@ -113,7 +113,9 @@ begin
 	       L.Add(TObject(P1));
 	    end;
       end;
+   {$IFDEF Linux}
    writeln(nCab,' qsos read. ',FnExch,' exchange fields');
+   {$ENDIF}
    close(F);
    //delete dupes
    L.Sort(CompareCalls);
@@ -124,7 +126,9 @@ begin
    for i := 0 to L.Count - 1  do
       if L[i] <> nil then
 	 nCab := nCab + 1;
+   {$IFDEF Linux}
    writeln(nCab,' non-dupe calls');
+   {$ENDIF}
    // copy into array
    SetLength(CabData,nCab);
    j := 0;
