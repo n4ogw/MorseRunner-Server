@@ -5,7 +5,7 @@ object MainForm: TMainForm
   Width = 645
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
-  Caption = 'Morse Runner Server 1.1'
+  Caption = 'Morse Runner Server 1.10'
   ClientHeight = 280
   ClientWidth = 645
   Color = clBtnFace

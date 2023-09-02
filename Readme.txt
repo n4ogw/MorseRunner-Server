@@ -1,4 +1,4 @@
-                              MORSE RUNNER SERVER 1.1
+                              MORSE RUNNER SERVER 1.10
 
                               Contest Simulator
 
