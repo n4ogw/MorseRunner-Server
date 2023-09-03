@@ -44,7 +44,7 @@ var
 implementation
 
 uses
-   Main;
+   Main,Ini;
 
 
 { TCabrillo }
@@ -148,7 +148,8 @@ end;
 
 function TCabrillo.PickCall: string;
 var
-   i :  integer;
+   i	  : integer;
+   tmpStr :  string;
 begin
   if nCab = 0 then
   begin
@@ -163,7 +164,19 @@ begin
   currentExch := '';
   for i:=1 to FnExch do
   begin
-     currentExch := currentExch + CabData[currentIndx].exch[i];
+     // check for RST in cabrillo file in first exchange position;
+     // replace with different RST or 5NN
+     if ((i = 1) and ((CabData[currentIndx].exch[i] = '599') or
+		     (CabData[currentIndx].exch[i] = '59'))) then
+	begin
+	   if Ini.Lids and (Random < 0.03) then
+	      tmpStr := IntToStr(559 + 10 * Random(4))
+	   else
+	      tmpStr := '5NN';
+	end
+        else
+	   tmpStr := CabData[currentIndx].exch[i];
+     currentExch := currentExch + tmpstr;
      if i < FnExch then
 	currentExch := currentExch + ' ';
   end;

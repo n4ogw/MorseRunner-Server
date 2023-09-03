@@ -1,4 +1,4 @@
-                              MORSE RUNNER SERVER 1.10
+                              MORSE RUNNER SERVER 1.11
 
                               Contest Simulator
 
@@ -272,12 +272,16 @@ F12 Wipe,{WIPE}=
 
 VERSION HISTORY
 
-1.1
+1.11
+	-when reading Cabrillo files, replace RST (599 or 59) in the
+	first exchange slot with 5NN or randomly generated RST
+	-fix Makefile for linux build
+1.10
 	support both Linux and Windows
 	add support for Winkey and OTRSP emulation
 	message format changed from 1.01
 
-1.0	Initial release. Support So2rmini-N6TR under linux
+1.00	Initial release. Support So2rmini-N6TR under linux
 
 
 DISCLAIMER OF WARRANTY

@@ -1,8 +1,8 @@
 PREFIX=/usr/local
 LAZBUILD=/usr/local/src/lazarus/lazbuild 
 all:
-	$(LAZBUILD) ./uecontrols-master/uecontrols.lpk
 	$(LAZBUILD) ./BGRABitmap/bgrabitmap/bgrabitmappack.lpk
+	$(LAZBUILD) ./uecontrols-master/uecontrols.lpk
 	$(LAZBUILD) ./talsoundout/talsoundout.lpk
 	$(LAZBUILD) MorseRunner-Server.lpr
 	strip lib/x86_64-linux/MorseRunner-Server
