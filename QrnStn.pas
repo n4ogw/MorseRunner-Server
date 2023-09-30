@@ -10,8 +10,7 @@ unit QrnStn;
 interface
 
 uses
-  SysUtils, Classes, Station, RndFunc, Ini, CallLst, SndTypes,
-  Math;
+  SysUtils, Classes, Station, RndFunc, Ini, CallLst, Math;
 
 type
   TQrnStation = class(TStation)

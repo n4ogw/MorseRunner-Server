@@ -62,7 +62,7 @@ var
 
 implementation
 
-uses Main;
+uses Main,Serial;
 
 {$R *.lfm}
 
@@ -92,7 +92,7 @@ begin
    Ini.serialPortWinkey := serialPortWinkeySave;
    Ini.serialPortOtrsp := serialPortOtrspSave;
    Ini.serialPortSo2rmini := serialPortSo2rminiSave;
-   MainForm.serialInit;
+   Ser.serialInit;
    MainForm.SetSerialMode(Ini.serialMode);
    Close;
 end;
@@ -103,7 +103,7 @@ begin
    Ini.serialPortWinkey := Trim(Edit1.Text);
    Ini.serialPortOtrsp := Trim(Edit2.Text);
    Ini.serialPortSo2rMini := Trim(Edit3.Text);
-   MainForm.serialInit;
+   Ser.serialInit;
    MainForm.SetSerialMode(Ini.serialMode);
 end;
 
@@ -113,7 +113,7 @@ begin
    Ini.serialPortWinkey := Trim(Edit1.Text);
    Ini.serialPortOtrsp := Trim(Edit2.Text);
    Ini.serialPortSo2rMini := Trim(Edit3.Text);
-   MainForm.serialInit;
+   Ser.serialInit;
    MainForm.SetSerialMode(Ini.serialMode);
    Close;
 end;
@@ -142,7 +142,7 @@ begin
 	 CheckGroup1.Checked[0] := False;
 	 Ini.serialMode := modeSo2rmini;
       end;
-   MainForm.serialInit;
+   Ser.serialInit;
    MainForm.SetSerialMode(Ini.serialMode);
 end;
 

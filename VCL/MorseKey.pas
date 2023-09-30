@@ -16,8 +16,8 @@ type
   TKeyer = class
   private
     Morse: array[char] of string;
-    RampLen: integer;
-    RampOn, RampOff: TSingleArray;
+//    RampLen: integer;
+//    RampOn, RampOff: TSingleArray;
     FRiseTime: single;
 
     function GetEnvelope: TSingleArray;
@@ -27,6 +27,9 @@ type
     function BlackmanHarrisStepResponse(Len: integer): TSingleArray;
     procedure SetRiseTime(const Value: single);
   public
+    RampLen: integer;
+    RampOn, RampOff: TSingleArray;
+
     Wpm: integer;
     BufSize: integer;
     Rate: integer;
@@ -68,7 +71,7 @@ end;
 constructor TKeyer.Create;
 begin
   LoadMorseTable;
-  Rate := 11025;
+  Rate := 22050;
   RiseTime := 0.005;
 end;
 

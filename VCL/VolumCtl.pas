@@ -12,9 +12,8 @@ interface
 //{$DEFINE DEBUG}
 
 uses
-  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics,
-  Controls, Forms, Dialogs,
-  SndTypes, Math;
+  LCLIntf, LCLType, SysUtils, Classes, Graphics,
+  Controls, Forms, Dialogs, SndTypes, Math;
 
 type
   TVolumeControl = class(TComponent)

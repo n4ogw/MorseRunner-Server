@@ -101,10 +101,6 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="Log.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
         <Filename Value="Qsb.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>

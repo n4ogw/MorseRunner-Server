@@ -40,8 +40,8 @@ type
     procedure MsgReceived(AMsg: TStationMessages);
     procedure SetState(AState: TOperatorState);
     function GetReply: TStationMessage;
-    procedure setNr(nr :  integer);
-  end;			  
+    procedure setNr(nr: integer);
+  end;
 
 
 implementation
@@ -51,11 +51,11 @@ uses
 
 { TDxOperator }
 
-procedure TDxOperator.setNr(nr :  integer);
+procedure TDxOperator.setNr(nr: integer);
 begin
-   radioNr := nr;
+  radioNr := nr;
 end;
-    
+
 
 //Delay before reply, keying speed and exchange number are functions
 //of the operator's skills
@@ -72,7 +72,7 @@ end;
 
 function TDxOperator.GetWpm: integer;
 begin
-   Result := Round(Ini.Wpm * 0.5 * (1 + Random));
+  Result := Round(Ini.Wpm * 0.5 * (1 + Random));
 end;
 
 
@@ -105,8 +105,7 @@ begin
   else
     Patience := FULL_PATIENCE;
 
-  if (AState = osNeedQso)  and
-    (Random < 0.1) then RepeatCnt := 2
+  if (AState = osNeedQso) and (Random < 0.1) then RepeatCnt := 2
   else
     RepeatCnt := 1;
 end;
@@ -244,6 +243,7 @@ begin
     end;
 
   if msgTU in AMsg then
+  begin
     case State of
       osNeedPrevEnd: SetState(osNeedQso);
       osNeedQso: ;
@@ -252,6 +252,7 @@ begin
       osNeedCallNr: ;
       osNeedEnd: State := osDone;
     end;
+  end;
 
   if (not Ini.Lids) and (AMsg = [msgGarbage]) then State := osNeedPrevEnd;
 
@@ -272,9 +273,9 @@ begin
 
 
     osNeedCall:
-       // N4OGW: make sending call twice much less likely
+      // N4OGW: make sending call twice much less likely
       if (Random > 0.1) then Result := msgDeMyCallNr1
-//      if (RunMode = rmHst) or (Random > 0.5) then Result := msgDeMyCallNr1
+      //      if (RunMode = rmHst) or (Random > 0.5) then Result := msgDeMyCallNr1
       else if Random > 0.25 then Result := msgDeMyCallNr2
       else
         Result := msgMyCallNr2;

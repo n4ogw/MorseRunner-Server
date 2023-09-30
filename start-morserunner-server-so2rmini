@@ -5,15 +5,15 @@
 #
 
 killall socat
-socat -d -d pty,rawer,echo=0,link=/tmp/pty1 pty,rawer,echo=0,link=/tmp/pty2 &
+socat -d -d pty,rawer,echo=0,link=/tmp/pty1 pty,rawer,echo=0,link=/tmp/pty1a &
 sleep 1
 if [ -e '/tmp/pty1' ];
 then
    echo 'Created /tmp/pty1'
 fi
-if [ -e '/tmp/pty2' ];
+if [ -e '/tmp/pty1a' ];
 then
-   echo 'Created /tmp/pty2'
+   echo 'Created /tmp/pty1a'
 fi
 MorseRunner-Server
 killall socat

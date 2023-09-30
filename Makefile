@@ -21,3 +21,4 @@ install:
 	install -o root -m 755 start-morserunner-server-winkey $(PREFIX)/bin
 	install -o root -m 644 Master.dta $(PREFIX)/share/morserunner-server
 	install -o root -m 644 Readme.txt $(PREFIX)/share/morserunner-server
+	install -o root -m 644 qrn-500hz.wav $(PREFIX)/share/morserunner-server

@@ -10,7 +10,7 @@ unit DxStn;
 interface
 
 uses
-  SysUtils, Classes, Station, RndFunc, Ini, CallLst, Qsb, DxOper, Log, SndTypes,
+  SysUtils, Classes, Station, RndFunc, Ini, CallLst, Qsb, DxOper, SndTypes,
    Cabrillo;
 
 type
@@ -23,7 +23,6 @@ type
     constructor CreateStation(num: integer);
     destructor Destroy; override;
     procedure ProcessEvent(AEvent: TStationEvent); override;
-    procedure DataToLastQso;
     function GetBlock: TSingleArray; override;
   end;
 
@@ -154,23 +153,6 @@ begin
     end;
   end;
 end;
-
-
-
-procedure TDxStation.DataToLastQso;
-begin
-  with QsoList[High(QsoList)] do
-  begin
-    TrueCall := Self.MyCall;
-    TrueRst := Self.Rst;
-    TrueNR := Self.NR;
-  end;
-
-  Free;
-end;
-
-
-
 
 function TDxStation.GetBlock: TSingleArray;
 begin

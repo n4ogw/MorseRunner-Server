@@ -10,7 +10,7 @@ unit Mixers;
 interface
 
 uses
-  SysUtils, Classes, SndTypes, Math;
+  SysUtils, Classes, SndTypes;
 
 type
 
