@@ -76,7 +76,7 @@ begin
   Envelope := nil;
   // Windows: N1MM sends extra winkey buffer clear at start of every message
   // must disable these otherwise qso sequence gets screwed up
-  {$ifdef Linux}
+  {$ifdef Windows}
   Msg := [msgGarbage];
   MsgText := '';
   Pieces.Clear;
