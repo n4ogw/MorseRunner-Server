@@ -1,4 +1,4 @@
-                              MORSE RUNNER SERVER 1.12
+                              MORSE RUNNER SERVER 1.13
 
                               Contest Simulator
 
@@ -322,6 +322,8 @@ Morserunner Server features
 
 VERSION HISTORY
 
+1.13
+	-fix Linux compile bug. No change to Windows version
 1.12
 	-add option to read WAV file for background radio noise
 1.11
